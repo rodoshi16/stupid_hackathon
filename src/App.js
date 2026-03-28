@@ -4,8 +4,7 @@ import './App.css';
 const APP_DEFS = [
   { id: 'thumbnail', label: 'Thumbnail Forge', accent: 'diamond' },
   { id: 'intro', label: 'Intro Blaster', accent: 'fire' },
-  { id: 'song', label: 'Parody Jukebox', accent: 'slime' },
-  { id: 'rage', label: 'Rage Translator', accent: 'danger' },
+  { id: 'rage', label: 'Ragebaiter', accent: 'danger' },
   { id: 'virus', label: 'Catfish Generator', accent: 'warning' },
 ];
 
@@ -17,24 +16,6 @@ const CLICKBAIT_TITLES = [
   'MOM WALKED IN DURING MY CLUTCH',
   'THIS BEDWARS HACK CHANGED HUMAN HISTORY',
 ];
-
-const SONG_TITLES = [
-  'Revenge 2',
-  'Creeper in My Walls',
-  'Mine All Night',
-  "Don't Dig Straight Down (Emotional Version)",
-  'Diamond Tears AMV',
-  'My Heart Is In The Nether',
-];
-
-const SONG_CHORUSES = [
-  'Creeper in my hallway, griefing my soul, swing that pickaxe baby, never let me go.',
-  'Mine mine mine till the sunrise hurts, crafted these feelings in a dirt block shirt.',
-  'Girl you got me lagging, redstone in my chest, respawn in your village and I will do the rest.',
-  'We fell in lava but the love stayed on, now I am autotuned inside this parody song.',
-];
-
-const SONG_GENRES = ['Dubstep Gospel', 'Sad Block Pop', 'MLG Trap', 'Galaxy Screamo', 'Optifine R&B'];
 
 const RAGE_REPLACEMENTS = [
   ['destroyed', 'rekt'],
@@ -135,10 +116,64 @@ const PARODY_ADS = [
 const DEFAULT_WINDOW_POSITIONS = {
   thumbnail: { x: 76, y: 108 },
   intro: { x: 280, y: 126 },
-  song: { x: 214, y: 236 },
   rage: { x: 588, y: 104 },
   virus: { x: 628, y: 264 },
 };
+
+const INTRO_THEME_CONFIGS = {
+  galaxy: {
+    label: 'Galaxy',
+    accent: '#8c6bff',
+    bgStart: '#090022',
+    bgEnd: '#12285c',
+    kicker: 'Nebula overdrive',
+    stamp: 'CERTIFIED COSMIC',
+    stinger: [262, 330, 392, 523],
+  },
+  hacker: {
+    label: 'Hacker',
+    accent: '#43ff94',
+    bgStart: '#03130b',
+    bgEnd: '#001f1d',
+    kicker: 'Elite access granted',
+    stamp: 'ROOT MODE',
+    stinger: [220, 247, 294, 330],
+  },
+  fire: {
+    label: 'Fire',
+    accent: '#ff7a1f',
+    bgStart: '#2b0500',
+    bgEnd: '#5e1200',
+    kicker: 'Heat level maximum',
+    stamp: 'TOO HOT 4 WIFI',
+    stinger: [196, 262, 330, 440],
+  },
+  mlg: {
+    label: 'MLG Gamer',
+    accent: '#fff14f',
+    bgStart: '#190025',
+    bgEnd: '#082c61',
+    kicker: 'Lens flare overload',
+    stamp: '420 69 NO SCOPE',
+    stinger: [330, 440, 554, 740],
+  },
+};
+
+const INTRO_RANDOM_NAMES = [
+  'XxShadowSniperProxX',
+  'iiToxicDragonHDii',
+  'FaZeBlockWizard',
+  'MLGPotatoDestroyer',
+  'NoScopePenguinTV',
+];
+
+const INTRO_RANDOM_TAGLINES = [
+  'Road to 1M before dinner.',
+  'No scope. No mercy. No homework.',
+  'Uploads every time the stars align.',
+  'Powered by RGB and poor decisions.',
+  'Subscribe before my mom gets home.',
+];
 
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
@@ -148,18 +183,44 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function generateSongCard() {
-  return {
-    title: randomItem(SONG_TITLES),
-    chorus: randomItem(SONG_CHORUSES),
-    genre: randomItem(SONG_GENRES),
-    cringe: Math.floor(Math.random() * 31) + 69,
-    popularity: `${Math.floor(Math.random() * 8) + 2}.${Math.floor(Math.random() * 10)}M fake views`,
-    palette: [
-      `hsl(${Math.floor(Math.random() * 360)} 95% 55%)`,
-      `hsl(${Math.floor(Math.random() * 360)} 100% 65%)`,
-    ],
-  };
+function seededUnit(seed, offset) {
+  const value = Math.sin(seed * 12.9898 + offset * 78.233) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+function getIntroTitleLayout(channelName) {
+  const clean = (channelName || 'XxShadowSniperProxX').trim();
+  const maxCharsPerLine = clean.length > 22 ? 11 : clean.length > 16 ? 14 : 18;
+  const words = clean.split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = '';
+
+  if (words.length <= 1) {
+    const solo = words[0] || clean;
+    for (let index = 0; index < solo.length; index += maxCharsPerLine) {
+      lines.push(solo.slice(index, index + maxCharsPerLine));
+    }
+  } else {
+    words.forEach((word) => {
+      const test = current ? `${current} ${word}` : word;
+      if (test.length > maxCharsPerLine && current) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = test;
+      }
+    });
+    if (current) {
+      lines.push(current);
+    }
+  }
+
+  const compactLines = lines.slice(0, 3);
+  const longest = compactLines.reduce((max, line) => Math.max(max, line.length), 0);
+  const scale = clamp(1.22 - Math.max(0, longest - 8) * 0.045 - (compactLines.length - 1) * 0.12, 0.52, 1);
+  const width = longest > 16 ? '92%' : longest > 12 ? '84%' : '74%';
+
+  return { lines: compactLines, scale, width };
 }
 
 function transformRageText(input) {
@@ -230,6 +291,308 @@ function playReusableAudio(enabled, audioRef, volume = 0.8) {
   audio.play().catch(() => {});
 }
 
+function loadImage(src) {
+  return new Promise((resolve) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+}
+
+async function exportRagebaitVideo({
+  sourceText,
+  topLine,
+  subLine,
+  stampLine,
+  rageLevel,
+  friendPhoto,
+}) {
+  if (
+    typeof window === 'undefined' ||
+    typeof MediaRecorder === 'undefined' ||
+    typeof HTMLCanvasElement === 'undefined'
+  ) {
+    window.alert('Video export is not supported in this browser.');
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 720;
+  canvas.height = 720;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    return;
+  }
+
+  const photo = await loadImage(friendPhoto);
+  const transformed = transformRageText(sourceText);
+  const duration = 2600;
+  const fps = 12;
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : 'video/webm';
+  const stream = canvas.captureStream(fps);
+  const recorder = new MediaRecorder(stream, { mimeType });
+  const chunks = [];
+
+  recorder.ondataavailable = (event) => {
+    if (event.data.size > 0) {
+      chunks.push(event.data);
+    }
+  };
+
+  const finished = new Promise((resolve) => {
+    recorder.onstop = resolve;
+  });
+
+  const drawFrame = (progress) => {
+    const wobble = Math.sin(progress * Math.PI * 10) * 8;
+    const pulse = 1 + Math.sin(progress * Math.PI * 4) * 0.04;
+    const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    bg.addColorStop(0, '#1a0508');
+    bg.addColorStop(0.5, '#0d0220');
+    bg.addColorStop(1, '#051a0d');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let index = 0; index < 14; index += 1) {
+      const x = seededUnit(progress + 3, index + 1) * canvas.width;
+      const y = seededUnit(progress + 9, index + 2) * canvas.height;
+      const radius = 36 + seededUnit(progress + 13, index + 3) * 90;
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      glow.addColorStop(0, 'rgba(255,20,147,0.3)');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.strokeStyle = '#ff1493';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(18, 18, canvas.width - 36, canvas.height - 36);
+    ctx.strokeStyle = '#bfff00';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(34, 34, canvas.width - 68, canvas.height - 68);
+
+    ctx.save();
+    ctx.translate(canvas.width / 2, 78);
+    ctx.rotate((-3 * Math.PI) / 180);
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 34px Impact, Haettenschweiler, sans-serif';
+    ctx.textAlign = 'center';
+    wrapCanvasText(ctx, topLine, 0, 0, 560, 36);
+    ctx.restore();
+
+    const photoX = 130;
+    const photoY = 170;
+    const photoW = 460;
+    const photoH = 290;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(photoX - 10, photoY - 10, photoW + 20, photoH + 20);
+    if (photo) {
+      ctx.drawImage(photo, photoX, photoY, photoW, photoH);
+    } else {
+      const fallback = ctx.createLinearGradient(photoX, photoY, photoX + photoW, photoY + photoH);
+      fallback.addColorStop(0, '#ff5db1');
+      fallback.addColorStop(1, '#00eaff');
+      ctx.fillStyle = fallback;
+      ctx.fillRect(photoX, photoY, photoW, photoH);
+      ctx.fillStyle = '#fff';
+      ctx.font = '900 44px Impact, Haettenschweiler, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('UPLOAD A PIC FOR MAXIMUM DAMAGE', canvas.width / 2, photoY + photoH / 2);
+    }
+
+    ctx.fillStyle = '#ffef4f';
+    ctx.fillRect(434, 476, 214, 48);
+    ctx.fillStyle = '#14080e';
+    ctx.font = '900 20px Impact, Haettenschweiler, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(stampLine, 541, 506);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 24px Trebuchet MS, sans-serif';
+    ctx.textAlign = 'center';
+    wrapCanvasText(ctx, subLine, canvas.width / 2, 558, 580, 28);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(96, 612, 528, 18);
+    ctx.fillStyle = '#00fff7';
+    ctx.fillRect(96, 612, (528 * rageLevel) / 100, 18);
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 16px Trebuchet MS, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`RAGE METER ${rageLevel}%`, 96, 606);
+
+    ctx.save();
+    ctx.translate(canvas.width / 2, 664 + wobble * 0.2);
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = '#fff14f';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 8;
+    ctx.font = '900 42px Impact, Haettenschweiler, sans-serif';
+    ctx.textAlign = 'center';
+    wrapCanvasStrokeText(ctx, transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT', 0, 0, 620, 40);
+    ctx.restore();
+  };
+
+  recorder.start();
+  const start = performance.now();
+
+  await new Promise((resolve) => {
+    const step = (now) => {
+      const progress = clamp((now - start) / duration, 0, 1);
+      drawFrame(progress);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        resolve();
+      }
+    };
+
+    requestAnimationFrame(step);
+  });
+
+  recorder.stop();
+  await finished;
+  stream.getTracks().forEach((track) => track.stop());
+
+  const blob = new Blob(chunks, { type: mimeType });
+  const link = document.createElement('a');
+  link.download = 'ragebaiter-export.webm';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = '';
+
+  words.forEach((word) => {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  lines.forEach((line, index) => {
+    ctx.fillText(line, x, y + index * lineHeight);
+  });
+}
+
+function wrapCanvasStrokeText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = '';
+
+  words.forEach((word) => {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  lines.forEach((line, index) => {
+    ctx.strokeText(line, x, y + index * lineHeight);
+    ctx.fillText(line, x, y + index * lineHeight);
+  });
+}
+
+function exportIntroPoster({
+  channelName,
+  tagline,
+  theme,
+  accentColor,
+  intensity,
+}) {
+  const themeConfig = INTRO_THEME_CONFIGS[theme];
+  const canvas = document.createElement('canvas');
+  canvas.width = 1280;
+  canvas.height = 720;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    return;
+  }
+
+  const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  bg.addColorStop(0, themeConfig.bgStart);
+  bg.addColorStop(1, themeConfig.bgEnd);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < 40 + intensity * 10; i += 1) {
+    const x = seededUnit(intensity, i + 1) * canvas.width;
+    const y = seededUnit(intensity + 2, i + 1) * canvas.height;
+    const radius = 2 + seededUnit(intensity + 4, i + 1) * 10;
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 4);
+    glow.addColorStop(0, `${accentColor}ee`);
+    glow.addColorStop(1, 'transparent');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((-8 * Math.PI) / 180);
+  ctx.font = '900 132px Impact, Haettenschweiler, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  for (let depth = 10; depth >= 1; depth -= 1) {
+    ctx.fillStyle = `rgba(0, 0, 0, ${0.1 + depth * 0.03})`;
+    ctx.fillText(channelName, depth * 7, depth * 8);
+  }
+
+  ctx.shadowColor = accentColor;
+  ctx.shadowBlur = 36;
+  ctx.fillStyle = '#fefefe';
+  ctx.fillText(channelName, 0, 0);
+  ctx.restore();
+
+  ctx.fillStyle = accentColor;
+  ctx.font = '700 34px Trebuchet MS, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(tagline || themeConfig.kicker, canvas.width / 2, 470);
+
+  ctx.fillStyle = '#fff14f';
+  ctx.fillRect(870, 88, 290, 72);
+  ctx.fillStyle = '#14080e';
+  ctx.font = '900 30px Impact, Haettenschweiler, sans-serif';
+  ctx.fillText(themeConfig.stamp, 1015, 134);
+
+  const link = document.createElement('a');
+  link.download = `cringecraft-intro-${theme}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
 function buildInitialWindows() {
   return APP_DEFS.reduce((accumulator, app, index) => {
     accumulator[app.id] = {
@@ -248,7 +611,7 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [bootProgress, setBootProgress] = useState(7);
   const [isCompact, setIsCompact] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= 1100 : false
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
   );
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [windows, setWindows] = useState(buildInitialWindows);
@@ -341,7 +704,7 @@ function App() {
 
   useEffect(() => {
     const syncCompact = () => {
-      setIsCompact(window.innerWidth <= 1100);
+      setIsCompact(window.innerWidth <= 768);
     };
 
     syncCompact();
@@ -350,14 +713,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!dragRef.current) {
-      return undefined;
-    }
-
     const handleMove = (event) => {
       if (!dragRef.current) {
         return;
       }
+
       const { id, offsetX, offsetY } = dragRef.current;
       setWindows((current) => ({
         ...current,
@@ -499,6 +859,7 @@ function App() {
   };
 
   const startDrag = (event, id) => {
+    event.preventDefault();
     const rect = event.currentTarget.parentElement.getBoundingClientRect();
     dragRef.current = {
       id,
@@ -664,27 +1025,10 @@ function App() {
           </Window>
         )}
 
-        {renderedWindowIds.includes('song') && (
-          <Window
-            id="song"
-            title="Minecraft Parody Jukebox"
-            position={windows.song.position}
-            focused={activeWindowId === 'song'}
-            isCompact={isCompact}
-            onFocus={focusWindow}
-            onMinimize={minimizeWindow}
-            onClose={closeWindow}
-            onDragStart={startDrag}
-            zIndex={30 + renderedWindowIds.indexOf('song')}
-          >
-            <SongGenerator soundEnabled={soundEnabled} />
-          </Window>
-        )}
-
         {renderedWindowIds.includes('rage') && (
           <Window
             id="rage"
-            title="Gamer Rage Translator"
+            title="Ragebaiter"
             position={windows.rage.position}
             focused={activeWindowId === 'rage'}
             isCompact={isCompact}
@@ -967,19 +1311,76 @@ function ThumbnailGenerator({ soundEnabled }) {
 function IntroMaker({ soundEnabled }) {
   const [channelName, setChannelName] = useState('XxShadowSniperProxX');
   const [tagline, setTagline] = useState('No scope. No mercy. No homework.');
-  const [favoriteColor, setFavoriteColor] = useState('#00f6ff');
-  const [vibe, setVibe] = useState('galaxy');
+  const [accentColor, setAccentColor] = useState('#8c6bff');
+  const [theme, setTheme] = useState('galaxy');
+  const [intensity, setIntensity] = useState(4);
+  const [audioOn, setAudioOn] = useState(true);
+  const [seed, setSeed] = useState(7);
   const [replayKey, setReplayKey] = useState(0);
+  const previewRef = useRef(null);
+
+  const themeConfig = INTRO_THEME_CONFIGS[theme];
+  const titleLayout = useMemo(() => getIntroTitleLayout(channelName), [channelName]);
+  const particleCount = 18 + intensity * 8;
+  const particles = useMemo(
+    () =>
+      Array.from({ length: particleCount }, (_, index) => ({
+        id: index,
+        size: 4 + seededUnit(seed, index + 1) * 18,
+        left: `${seededUnit(seed + 11, index + 2) * 100}%`,
+        top: `${seededUnit(seed + 23, index + 3) * 100}%`,
+        delay: `${seededUnit(seed + 37, index + 4) * 1.8}s`,
+        duration: `${2.2 + seededUnit(seed + 41, index + 5) * 3.4}s`,
+      })),
+    [particleCount, seed]
+  );
 
   const replayIntro = () => {
     setReplayKey((value) => value + 1);
-    playToneSequence(soundEnabled, [330, 392, 494, 660], 0.11);
+    if (soundEnabled && audioOn) {
+      playToneSequence(true, themeConfig.stinger, 0.1);
+    }
+  };
+
+  const generateIntro = () => {
+    setSeed((value) => value + 13);
+    replayIntro();
+  };
+
+  const randomizeIntro = () => {
+    const themes = Object.keys(INTRO_THEME_CONFIGS);
+    const randomTheme = randomItem(themes);
+    const nextName = randomItem(INTRO_RANDOM_NAMES);
+    const nextTagline = randomItem(INTRO_RANDOM_TAGLINES);
+    setTheme(randomTheme);
+    setChannelName(nextName);
+    setTagline(nextTagline);
+    setAccentColor(INTRO_THEME_CONFIGS[randomTheme].accent);
+    setIntensity(Math.floor(Math.random() * 5) + 1);
+    setSeed((value) => value + 97);
+    window.setTimeout(() => {
+      if (soundEnabled && audioOn) {
+        playToneSequence(true, INTRO_THEME_CONFIGS[randomTheme].stinger, 0.1);
+      }
+      setReplayKey((value) => value + 1);
+    }, 0);
+  };
+
+  const openFullscreen = async () => {
+    if (!previewRef.current?.requestFullscreen) {
+      return;
+    }
+    try {
+      await previewRef.current.requestFullscreen();
+    } catch (error) {
+      // Ignore browser fullscreen restrictions.
+    }
   };
 
   return (
     <div className="app-grid app-grid-intro">
       <div className="panel controls-panel">
-        <h2>Intro Blaster Controls</h2>
+        <h2>3D Intro Maker Controls</h2>
         <label className="control-stack">
           <span>Channel name</span>
           <input value={channelName} onChange={(event) => setChannelName(event.target.value)} />
@@ -989,86 +1390,146 @@ function IntroMaker({ soundEnabled }) {
           <input value={tagline} onChange={(event) => setTagline(event.target.value)} />
         </label>
         <label className="control-stack">
-          <span>Favorite color</span>
-          <input type="color" value={favoriteColor} onChange={(event) => setFavoriteColor(event.target.value)} />
+          <span>Accent color</span>
+          <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} />
         </label>
         <label className="control-stack">
-          <span>Vibe</span>
-          <select value={vibe} onChange={(event) => setVibe(event.target.value)}>
-            <option value="hacker">Hacker</option>
-            <option value="gaming">Gaming</option>
-            <option value="neon">Neon</option>
+          <span>Theme</span>
+          <select value={theme} onChange={(event) => setTheme(event.target.value)}>
             <option value="galaxy">Galaxy</option>
+            <option value="hacker">Hacker</option>
             <option value="fire">Fire</option>
+            <option value="mlg">MLG Gamer</option>
           </select>
         </label>
+        <label className="slider-row">
+          <span>Animation intensity: {intensity}</span>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            value={intensity}
+            onChange={(event) => setIntensity(Number(event.target.value))}
+          />
+        </label>
+        <label className="toggle-row">
+          <input
+            type="checkbox"
+            checked={audioOn}
+            onChange={(event) => setAudioOn(event.target.checked)}
+          />
+          <span>Theme audio stinger</span>
+        </label>
         <div className="button-row">
+          <button type="button" onClick={generateIntro}>
+            Generate intro
+          </button>
           <button type="button" onClick={replayIntro}>
             Replay intro
           </button>
+          <button type="button" onClick={randomizeIntro}>
+            Randomize
+          </button>
           <button
             type="button"
-            onClick={() => {
-              setChannelName('iiToxicDragonHDii');
-              setTagline('Road to 1M before dinner');
-              setVibe('fire');
-              replayIntro();
-            }}
+            onClick={() =>
+              exportIntroPoster({
+                channelName,
+                tagline,
+                theme,
+                accentColor,
+                intensity,
+              })
+            }
           >
-            Make it worse
+            Screenshot
+          </button>
+          <button type="button" onClick={openFullscreen}>
+            Fullscreen
           </button>
         </div>
+        <p className="panel-caption">
+          Free intro maker no virus. Real-time fake 3D drama with way too much camera energy.
+        </p>
       </div>
-      <div className="panel intro-preview">
-        <div className={`intro-scene vibe-${vibe}`} key={replayKey} style={{ '--intro-color': favoriteColor }}>
-          <div className="intro-particles" />
-          <div className="intro-ring" />
-          <div className="intro-name">{channelName}</div>
-          <div className="intro-tagline">{tagline}</div>
-          <div className="intro-stamp">SUBSCRIBE NOW NO VIRUS</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SongGenerator({ soundEnabled }) {
-  const [song, setSong] = useState(() => generateSongCard());
-
-  const regenerate = () => {
-    setSong(generateSongCard());
-    playToneSequence(soundEnabled, [262, 330, 392, 523], 0.09);
-  };
-
-  return (
-    <div className="app-grid app-grid-song">
-      <div className="panel song-cover-panel">
+      <div className="panel intro-preview intro-preview-3d" ref={previewRef}>
         <div
-          className="song-cover"
+          className={`intro-scene intro-scene-3d theme-${theme}`}
+          key={`${replayKey}-${seed}`}
           style={{
-            background: `radial-gradient(circle at top, ${song.palette[0]}, transparent 45%), linear-gradient(135deg, ${song.palette[1]}, #090011)`,
+            '--intro-color': accentColor,
+            '--intro-bg-start': themeConfig.bgStart,
+            '--intro-bg-end': themeConfig.bgEnd,
+            '--intro-intensity': intensity,
           }}
         >
-          <div className="song-cover-grid" />
-          <div className="song-cover-title">{song.title}</div>
-          <div className="song-cover-subtitle">{song.genre}</div>
-        </div>
-      </div>
-      <div className="panel controls-panel">
-        <h2>Parody Song Forge</h2>
-        <p className="song-meta">{song.popularity}</p>
-        <p className="song-chorus">"{song.chorus}"</p>
-        <div className="cringe-meter">
-          <span>Cringe rating</span>
-          <strong>{song.cringe}/100</strong>
-        </div>
-        <div className="button-row">
-          <button type="button" onClick={regenerate}>
-            Regenerate anthem
-          </button>
-          <button type="button" onClick={() => playToneSequence(soundEnabled, [220, 262, 294, 262], 0.18)}>
-            Play chorus
-          </button>
+          <div className="intro-scene-camera">
+            <div className="intro-background-shell">
+              <div className="intro-grid-floor" />
+              <div className="intro-speedlines" />
+              <div className="intro-lensflare intro-lensflare-a" />
+              <div className="intro-lensflare intro-lensflare-b" />
+              <div className="intro-theme-kicker">{themeConfig.kicker}</div>
+              <div className="intro-particles-3d" aria-hidden="true">
+                {particles.map((particle) => (
+                  <span
+                    key={particle.id}
+                    className="intro-particle"
+                    style={{
+                      width: `${particle.size}px`,
+                      height: `${particle.size}px`,
+                      left: particle.left,
+                      top: particle.top,
+                      animationDelay: particle.delay,
+                      animationDuration: particle.duration,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="intro-title-stack">
+              <div
+                className="intro-title-rotor"
+                style={{
+                  '--intro-title-scale': titleLayout.scale,
+                  '--intro-title-width': titleLayout.width,
+                }}
+              >
+                <div className="intro-title-depth intro-title-depth-4">
+                  {titleLayout.lines.map((line) => (
+                    <span key={`d4-${line}`}>{line}</span>
+                  ))}
+                </div>
+                <div className="intro-title-depth intro-title-depth-3">
+                  {titleLayout.lines.map((line) => (
+                    <span key={`d3-${line}`}>{line}</span>
+                  ))}
+                </div>
+                <div className="intro-title-depth intro-title-depth-2">
+                  {titleLayout.lines.map((line) => (
+                    <span key={`d2-${line}`}>{line}</span>
+                  ))}
+                </div>
+                <div className="intro-title-depth intro-title-depth-1">
+                  {titleLayout.lines.map((line) => (
+                    <span key={`d1-${line}`}>{line}</span>
+                  ))}
+                </div>
+                <div className="intro-title-front">
+                  {titleLayout.lines.map((line) => (
+                    <span key={`front-${line}`}>{line}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="intro-subtitle">{tagline || 'UPLOADS DAILY IF MY WIFI SURVIVES'}</div>
+            <div className="intro-ui-strip">
+              <span>{themeConfig.label}</span>
+              <span>INTENSITY {intensity}/5</span>
+              <span>SEED #{seed}</span>
+            </div>
+            <div className="intro-stamp-3d">{themeConfig.stamp}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1081,6 +1542,7 @@ function RageTranslator() {
   const [catfishTopIdx, setCatfishTopIdx] = useState(0);
   const [catfishSubIdx, setCatfishSubIdx] = useState(0);
   const [catfishStampIdx, setCatfishStampIdx] = useState(0);
+  const [exporting, setExporting] = useState(false);
   const transformed = transformRageText(sourceText);
   const rageLevel = clamp(Math.floor(transformed.length * 0.9), 12, 100);
 
@@ -1088,6 +1550,22 @@ function RageTranslator() {
     setCatfishTopIdx(Math.floor(Math.random() * CATFISH_MEME_TOP.length));
     setCatfishSubIdx(Math.floor(Math.random() * CATFISH_MEME_SUB.length));
     setCatfishStampIdx(Math.floor(Math.random() * CATFISH_MEME_STAMP.length));
+  };
+
+  const exportVideo = async () => {
+    setExporting(true);
+    try {
+      await exportRagebaitVideo({
+        sourceText,
+        topLine: CATFISH_MEME_TOP[catfishTopIdx],
+        subLine: CATFISH_MEME_SUB[catfishSubIdx],
+        stampLine: CATFISH_MEME_STAMP[catfishStampIdx],
+        rageLevel,
+        friendPhoto,
+      });
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleFriendPhoto = (event) => {
@@ -1118,8 +1596,14 @@ function RageTranslator() {
             Reroll unhinged captions
           </button>
         ) : null}
+        <div className="rage-share-box">
+          <span className="panel-caption">Export as video</span>
+          <button type="button" onClick={exportVideo} disabled={exporting}>
+            {exporting ? 'Rendering WEBM...' : 'Export WEBM'}
+          </button>
+        </div>
         <p className="panel-caption">
-          Rage text still prints on the meme. Everything stays in your browser.
+          Generates a short downloadable WEBM clip of the current ragebait meme.
         </p>
       </div>
       <div className="panel rage-output">
