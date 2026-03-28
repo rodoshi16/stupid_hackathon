@@ -6,7 +6,7 @@ const APP_DEFS = [
   { id: 'intro', label: 'Intro Blaster', accent: 'fire' },
   { id: 'song', label: 'Parody Jukebox', accent: 'slime' },
   { id: 'rage', label: 'Rage Translator', accent: 'danger' },
-  { id: 'virus', label: 'Totally Safe Download', accent: 'warning' },
+  { id: 'virus', label: 'Catfish Generator', accent: 'warning' },
 ];
 
 const CLICKBAIT_TITLES = [
@@ -218,6 +218,18 @@ function playRandomNotificationSound(enabled) {
   playAudioFile(enabled, randomItem(['discord.mp3', 'skype.mp3']), 0.45);
 }
 
+function playReusableAudio(enabled, audioRef, volume = 0.8) {
+  if (!enabled || !audioRef.current) {
+    return;
+  }
+
+  const audio = audioRef.current;
+  audio.pause();
+  audio.currentTime = 0;
+  audio.volume = volume;
+  audio.play().catch(() => {});
+}
+
 function buildInitialWindows() {
   return APP_DEFS.reduce((accumulator, app, index) => {
     accumulator[app.id] = {
@@ -247,6 +259,10 @@ function App() {
   const [adPopups, setAdPopups] = useState([]);
   const [achievement, setAchievement] = useState('Viral in 2016');
   const dragRef = useRef(null);
+  const adDragRef = useRef(null);
+  const airhornRef = useRef(
+    typeof Audio !== 'undefined' ? new Audio(`${process.env.PUBLIC_URL}/airhorn.mp3`) : null
+  );
 
   useEffect(() => {
     const progressTimer = window.setInterval(() => {
@@ -294,6 +310,9 @@ function App() {
         ...template,
         x: 18 + Math.floor(Math.random() * 250),
         y: 110 + Math.floor(Math.random() * 190),
+        width: 250,
+        height: 170,
+        order: Date.now() + popupId,
       };
       popupId += 1;
       setAdPopups((current) => [nextPopup, ...current].slice(0, 3));
@@ -364,6 +383,57 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (
+      airhornRef.current &&
+      !(typeof navigator !== 'undefined' && /jsdom/i.test(navigator.userAgent))
+    ) {
+      airhornRef.current.preload = 'auto';
+      airhornRef.current.load();
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleMove = (event) => {
+      if (!adDragRef.current) {
+        return;
+      }
+
+      const { id, offsetX, offsetY } = adDragRef.current;
+      setAdPopups((current) =>
+        current.map((popup) =>
+          popup.id === id
+            ? {
+                ...popup,
+                x: clamp(
+                  window.innerWidth - (event.clientX - offsetX) - (popup.width || 250),
+                  12,
+                  window.innerWidth - (popup.width || 250) - 12
+                ),
+                y: clamp(
+                  event.clientY - offsetY,
+                  74,
+                  window.innerHeight - (popup.height || 170) - 92
+                ),
+              }
+            : popup
+        )
+      );
+    };
+
+    const handleUp = () => {
+      adDragRef.current = null;
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', handleUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleUp);
+    };
+  }, []);
+
   const desktopApps = useMemo(
     () =>
       APP_DEFS.map((app) => ({
@@ -376,6 +446,20 @@ function App() {
 
   const focusWindow = (id) => {
     setFocusOrder((current) => [...current.filter((item) => item !== id), id]);
+  };
+
+  const focusAdPopup = (id) => {
+    setAdPopups((current) => {
+      const maxOrder = current.reduce((max, popup) => Math.max(max, popup.order || 0), 0);
+      return current.map((popup) =>
+        popup.id === id
+          ? {
+              ...popup,
+              order: maxOrder + 1,
+            }
+          : popup
+      );
+    });
   };
 
   const openWindow = (id) => {
@@ -496,19 +580,35 @@ function App() {
       </div>
 
       <div className="ad-popup-layer">
-        {adPopups.map((popup) => (
+        {adPopups
+          .slice()
+          .sort((left, right) => (left.order || 0) - (right.order || 0))
+          .map((popup) => (
           <div
             className="ad-popup"
             key={popup.id}
-            style={{ right: `${popup.x}px`, top: `${popup.y}px` }}
+            style={{ right: `${popup.x}px`, top: `${popup.y}px`, zIndex: 80 + (popup.order || 0) }}
+            onPointerDown={() => focusAdPopup(popup.id)}
           >
-            <div className="ad-popup-titlebar">
+            <div
+              className="ad-popup-titlebar"
+              onPointerDown={(event) => {
+                const rect = event.currentTarget.parentElement.getBoundingClientRect();
+                adDragRef.current = {
+                  id: popup.id,
+                  offsetX: event.clientX - rect.left,
+                  offsetY: event.clientY - rect.top,
+                };
+                focusAdPopup(popup.id);
+              }}
+            >
               <span>{popup.windowTitle}</span>
               <button
                 type="button"
-                onClick={() =>
+                onClick={(event) => {
+                  event.stopPropagation();
                   setAdPopups((current) => current.filter((item) => item.id !== popup.id))
-                }
+                }}
               >
                 x
               </button>
@@ -526,7 +626,7 @@ function App() {
               <button type="button">{popup.cta}</button>
             </div>
           </div>
-        ))}
+          ))}
       </div>
 
       <section className={`window-layer ${isCompact ? 'window-layer-compact' : ''}`}>
@@ -601,7 +701,7 @@ function App() {
         {renderedWindowIds.includes('virus') && (
           <Window
             id="virus"
-            title="TotallySafeDownload.biz"
+            title="Catfish Generator"
             position={windows.virus.position}
             focused={activeWindowId === 'virus'}
             isCompact={isCompact}
@@ -627,7 +727,7 @@ function App() {
         <button
           className="taskbar-button"
           type="button"
-          onClick={() => playAudioFile(soundEnabled, 'airhorn.mp3', 0.8)}
+          onClick={() => playReusableAudio(soundEnabled, airhornRef, 0.8)}
         >
           AIRHORN
         </button>

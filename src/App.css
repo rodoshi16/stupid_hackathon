@@ -143,7 +143,7 @@
   display: grid;
   gap: 12px;
   width: 110px;
-  z-index: 40;
+  z-index: 20;
 }
 
 .desktop-icon {
@@ -268,7 +268,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 24;
+  z-index: 120;
 }
 
 .ad-popup {
@@ -292,6 +292,8 @@
   color: #fff;
   font-weight: 700;
   font-size: 0.85rem;
+  cursor: move;
+  user-select: none;
 }
 
 .ad-popup-titlebar button {
@@ -371,12 +373,13 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 60;
 }
 
 .window-layer-compact {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 90;
   pointer-events: none;
 }
 
