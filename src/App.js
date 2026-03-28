@@ -62,6 +62,14 @@ const DESKTOP_NOTICES = [
   'Dubstep engine warmed up and ready for deployment.',
 ];
 
+const DEFAULT_WINDOW_POSITIONS = {
+  thumbnail: { x: 76, y: 108 },
+  intro: { x: 280, y: 126 },
+  song: { x: 214, y: 236 },
+  rage: { x: 588, y: 104 },
+  virus: { x: 628, y: 264 },
+};
+
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -126,23 +134,33 @@ function playToneSequence(enabled, frequencies, duration = 0.12) {
   });
 }
 
+function buildInitialWindows() {
+  return APP_DEFS.reduce((accumulator, app, index) => {
+    accumulator[app.id] = {
+      open: app.id === 'thumbnail',
+      minimized: false,
+      title: app.label,
+      accent: app.accent,
+      position: DEFAULT_WINDOW_POSITIONS[app.id],
+      order: index,
+    };
+    return accumulator;
+  }, {});
+}
+
 function App() {
   const [booting, setBooting] = useState(true);
   const [bootProgress, setBootProgress] = useState(7);
+  const [isCompact, setIsCompact] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 1100 : false
+  );
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [openApps, setOpenApps] = useState(['thumbnail']);
-  const [focusedApp, setFocusedApp] = useState('thumbnail');
+  const [windows, setWindows] = useState(buildInitialWindows);
+  const [focusOrder, setFocusOrder] = useState(['thumbnail']);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'CringeCraft OS recovered from a dusty 2016 USB stick.' },
   ]);
   const [achievement, setAchievement] = useState('Viral in 2016');
-  const [windowPositions, setWindowPositions] = useState({
-    thumbnail: { x: 64, y: 92 },
-    intro: { x: 240, y: 126 },
-    song: { x: 190, y: 210 },
-    rage: { x: 500, y: 88 },
-    virus: { x: 540, y: 238 },
-  });
   const dragRef = useRef(null);
 
   useEffect(() => {
@@ -180,6 +198,16 @@ function App() {
   }, [booting]);
 
   useEffect(() => {
+    const syncCompact = () => {
+      setIsCompact(window.innerWidth <= 1100);
+    };
+
+    syncCompact();
+    window.addEventListener('resize', syncCompact);
+    return () => window.removeEventListener('resize', syncCompact);
+  }, []);
+
+  useEffect(() => {
     if (!dragRef.current) {
       return undefined;
     }
@@ -189,11 +217,14 @@ function App() {
         return;
       }
       const { id, offsetX, offsetY } = dragRef.current;
-      setWindowPositions((current) => ({
+      setWindows((current) => ({
         ...current,
         [id]: {
-          x: clamp(event.clientX - offsetX, 12, window.innerWidth - 380),
-          y: clamp(event.clientY - offsetY, 28, window.innerHeight - 280),
+          ...current[id],
+          position: {
+            x: clamp(event.clientX - offsetX, 12, window.innerWidth - 380),
+            y: clamp(event.clientY - offsetY, 28, window.innerHeight - 280),
+          },
         },
       }));
     };
@@ -214,20 +245,50 @@ function App() {
     () =>
       APP_DEFS.map((app) => ({
         ...app,
-        open: openApps.includes(app.id),
+        open: windows[app.id]?.open,
+        minimized: windows[app.id]?.minimized,
       })),
-    [openApps]
+    [windows]
   );
 
+  const focusWindow = (id) => {
+    setFocusOrder((current) => [...current.filter((item) => item !== id), id]);
+  };
+
   const openWindow = (id) => {
-    setOpenApps((current) => (current.includes(id) ? current : [...current, id]));
-    setFocusedApp(id);
+    setWindows((current) => ({
+      ...current,
+      [id]: {
+        ...current[id],
+        open: true,
+        minimized: false,
+      },
+    }));
+    focusWindow(id);
     playToneSequence(soundEnabled, [660, 880], 0.08);
   };
 
+  const minimizeWindow = (id) => {
+    setWindows((current) => ({
+      ...current,
+      [id]: {
+        ...current[id],
+        minimized: true,
+      },
+    }));
+    setFocusOrder((current) => current.filter((item) => item !== id));
+  };
+
   const closeWindow = (id) => {
-    setOpenApps((current) => current.filter((item) => item !== id));
-    setFocusedApp((current) => (current === id ? 'thumbnail' : current));
+    setWindows((current) => ({
+      ...current,
+      [id]: {
+        ...current[id],
+        open: false,
+        minimized: false,
+      },
+    }));
+    setFocusOrder((current) => current.filter((item) => item !== id));
   };
 
   const startDrag = (event, id) => {
@@ -237,8 +298,21 @@ function App() {
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top,
     };
-    setFocusedApp(id);
+    focusWindow(id);
   };
+
+  const activeWindowId =
+    [...focusOrder]
+      .reverse()
+      .find((id) => windows[id]?.open && !windows[id]?.minimized) ||
+    APP_DEFS.find((app) => windows[app.id]?.open && !windows[app.id]?.minimized)?.id ||
+    '';
+
+  const renderedWindowIds = isCompact
+    ? activeWindowId
+      ? [activeWindowId]
+      : []
+    : focusOrder.filter((id) => windows[id]?.open && !windows[id]?.minimized);
 
   if (booting) {
     return (
@@ -261,7 +335,7 @@ function App() {
   }
 
   return (
-    <main className="cringe-os">
+    <main className={`cringe-os ${isCompact ? 'compact-mode' : ''}`}>
       <div className="wallpaper-noise" />
       <header className="desktop-marquee">
         <span>CRINGECRAFT STUDIO</span>
@@ -273,7 +347,7 @@ function App() {
         {desktopApps.map((app) => (
           <button
             key={app.id}
-            className={`desktop-icon accent-${app.accent}`}
+            className={`desktop-icon accent-${app.accent} ${app.open && !app.minimized ? 'desktop-icon-open' : ''}`}
             onClick={() => openWindow(app.id)}
             type="button"
           >
@@ -294,72 +368,87 @@ function App() {
         ))}
       </div>
 
-      <section className="window-layer">
-        {openApps.includes('thumbnail') && (
+      <section className={`window-layer ${isCompact ? 'window-layer-compact' : ''}`}>
+        {renderedWindowIds.includes('thumbnail') && (
           <Window
             id="thumbnail"
             title="Minecraft Thumbnail Forge.exe"
-            position={windowPositions.thumbnail}
-            focused={focusedApp === 'thumbnail'}
-            onFocus={setFocusedApp}
+            position={windows.thumbnail.position}
+            focused={activeWindowId === 'thumbnail'}
+            isCompact={isCompact}
+            onFocus={focusWindow}
+            onMinimize={minimizeWindow}
             onClose={closeWindow}
             onDragStart={startDrag}
+            zIndex={30 + renderedWindowIds.indexOf('thumbnail')}
           >
             <ThumbnailGenerator soundEnabled={soundEnabled} />
           </Window>
         )}
 
-        {openApps.includes('intro') && (
+        {renderedWindowIds.includes('intro') && (
           <Window
             id="intro"
             title="2016 Intro Blaster Pro"
-            position={windowPositions.intro}
-            focused={focusedApp === 'intro'}
-            onFocus={setFocusedApp}
+            position={windows.intro.position}
+            focused={activeWindowId === 'intro'}
+            isCompact={isCompact}
+            onFocus={focusWindow}
+            onMinimize={minimizeWindow}
             onClose={closeWindow}
             onDragStart={startDrag}
+            zIndex={30 + renderedWindowIds.indexOf('intro')}
           >
             <IntroMaker soundEnabled={soundEnabled} />
           </Window>
         )}
 
-        {openApps.includes('song') && (
+        {renderedWindowIds.includes('song') && (
           <Window
             id="song"
             title="Minecraft Parody Jukebox"
-            position={windowPositions.song}
-            focused={focusedApp === 'song'}
-            onFocus={setFocusedApp}
+            position={windows.song.position}
+            focused={activeWindowId === 'song'}
+            isCompact={isCompact}
+            onFocus={focusWindow}
+            onMinimize={minimizeWindow}
             onClose={closeWindow}
             onDragStart={startDrag}
+            zIndex={30 + renderedWindowIds.indexOf('song')}
           >
             <SongGenerator soundEnabled={soundEnabled} />
           </Window>
         )}
 
-        {openApps.includes('rage') && (
+        {renderedWindowIds.includes('rage') && (
           <Window
             id="rage"
             title="Gamer Rage Translator"
-            position={windowPositions.rage}
-            focused={focusedApp === 'rage'}
-            onFocus={setFocusedApp}
+            position={windows.rage.position}
+            focused={activeWindowId === 'rage'}
+            isCompact={isCompact}
+            onFocus={focusWindow}
+            onMinimize={minimizeWindow}
             onClose={closeWindow}
             onDragStart={startDrag}
+            zIndex={30 + renderedWindowIds.indexOf('rage')}
           >
             <RageTranslator />
           </Window>
         )}
 
-        {openApps.includes('virus') && (
+        {renderedWindowIds.includes('virus') && (
           <Window
             id="virus"
             title="TotallySafeDownload.biz"
-            position={windowPositions.virus}
-            focused={focusedApp === 'virus'}
-            onFocus={setFocusedApp}
+            position={windows.virus.position}
+            focused={activeWindowId === 'virus'}
+            isCompact={isCompact}
+            onFocus={focusWindow}
+            onMinimize={minimizeWindow}
             onClose={closeWindow}
             onDragStart={startDrag}
+            zIndex={30 + renderedWindowIds.indexOf('virus')}
           >
             <VirusSimulator soundEnabled={soundEnabled} />
           </Window>
@@ -382,26 +471,72 @@ function App() {
         >
           AIRHORN
         </button>
+        <div className="taskbar-apps">
+          {desktopApps.map((app) => (
+            <button
+              key={app.id}
+              className={`taskbar-app ${app.open && !app.minimized ? 'taskbar-app-active' : ''}`}
+              type="button"
+              onClick={() => {
+                if (!app.open || app.minimized || activeWindowId !== app.id) {
+                  openWindow(app.id);
+                  return;
+                }
+                minimizeWindow(app.id);
+              }}
+            >
+              <span aria-hidden="true">{app.icon}</span>
+              <span>{app.label}</span>
+            </button>
+          ))}
+        </div>
         <div className="taskbar-achievement">Achievement unlocked: {achievement}</div>
       </footer>
     </main>
   );
 }
 
-function Window({ id, title, position, focused, onFocus, onClose, onDragStart, children }) {
+function Window({
+  id,
+  title,
+  position,
+  focused,
+  isCompact,
+  onFocus,
+  onMinimize,
+  onClose,
+  onDragStart,
+  zIndex,
+  children,
+}) {
   return (
     <article
-      className={`window-frame ${focused ? 'focused' : ''}`}
-      style={{ left: position.x, top: position.y, zIndex: focused ? 20 : 10 }}
+      className={`window-frame ${focused ? 'focused' : ''} ${isCompact ? 'compact-window-frame' : ''}`}
+      style={isCompact ? { zIndex } : { left: position.x, top: position.y, zIndex }}
       onPointerDown={() => onFocus(id)}
     >
-      <div className="window-titlebar" onPointerDown={(event) => onDragStart(event, id)}>
+      <div
+        className="window-titlebar"
+        onPointerDown={isCompact ? undefined : (event) => onDragStart(event, id)}
+      >
         <span>{title}</span>
         <div className="window-actions">
-          <button type="button" onClick={() => onFocus(id)}>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onMinimize(id);
+            }}
+          >
             _
           </button>
-          <button type="button" onClick={() => onClose(id)}>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onClose(id);
+            }}
+          >
             X
           </button>
         </div>
