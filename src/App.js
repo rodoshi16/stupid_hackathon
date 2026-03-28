@@ -46,6 +46,36 @@ const RAGE_REPLACEMENTS = [
   ['good', 'cracked'],
 ];
 
+const CATFISH_MEME_TOP = [
+  'STOP SAYING THATS NOT THE SAME PERSON IT IS??? WE JUST LOOK DIFFERENT IN NATURAL LIGHT',
+  'IF U SCREENSHOT THIS UR GOING TO HELL IM NOT JOKING MY COUSINS UNCLE WORKS AT MOJANG',
+  'THIS ISNT CATFISHING ITS CALLED CAMERA SHY + GLOW UP + DIFFERENT HAIR DAY',
+  'DONT ASK FOR VC IM IN THE HOSPITAL (EMOTIONAL) (WIFI DIED) (NOT EXCUSES THEYRE REASONS)',
+  'VERIFIED BY ME ✅ I LITERALLY TOOK IT ON MY PHONE (ITS MY FRIENDS PHONE BUT STILL)',
+  'GOOGLE REVERSE IMAGE SEARCH IS LITERALLY GASLIGHTING ME ON PURPOSE',
+  'MY EX POSTED A FAKE OF ME SO NOW EVERYONE THINKS IM THE FAKE ONE (UPSIDE DOWN WORLD)',
+  'SHE DOESNT EVEN LOOK LIKE THAT IRL IRL SHE LOOKS BETTER THIS IS HER WORST ANGLE TRUST',
+];
+
+const CATFISH_MEME_SUB = [
+  '5’4 in heels | 6’2 in spirit | NO I WONT PROVE IT STOP INTERROGATING ME',
+  'if ur over 25 pls dont talk to me im 19 (almost 20) (mentally 12) (legally deranged)',
+  'im not toxic ur just triggered + ratio + L + cope + seethe + i have a bf (hes in canada)',
+  'only accepting people who GET my humor (if u dont ur a npc no offense)',
+  'dm if u can portforward its for homework (real) (not a virus) (trust)',
+  'my mic broke + my cam broke + my face broke + stop asking its weird actually',
+  'looking for someone who buys ranks and DOESNT ask questions (red flag if u ask)',
+  'if u think im fake then why am i typing words right now checkmate',
+];
+
+const CATFISH_MEME_STAMP = [
+  '💀 NOT STOLEN FROM GOOGLE (PROBABLY) 💀',
+  '⚠️ DO NOT CROP OR I WILL MANIFEST IN UR DREAMS ⚠️',
+  '🚨 ANGEL NUMBER / MAIN CHARACTER / CHOSEN ONE ENERGY 🚨',
+  '✨ SAME PERSON AS PFP STOP DOING DETECTIVE WORK ✨',
+  '🔥 IF THIS IS FAKE THEN WHY AM I CRYING REAL TEARS RN 🔥',
+];
+
 const VIRUS_POPUPS = [
   'YOUR PC HAS 37 TROJANS',
   'HOT SINGLES NEAR YOUR REDSTONE FARM',
@@ -836,22 +866,87 @@ function SongGenerator({ soundEnabled }) {
 
 function RageTranslator() {
   const [sourceText, setSourceText] = useState('Wow that was a cool and easy win for my friend');
+  const [friendPhoto, setFriendPhoto] = useState('');
+  const [catfishTopIdx, setCatfishTopIdx] = useState(0);
+  const [catfishSubIdx, setCatfishSubIdx] = useState(0);
+  const [catfishStampIdx, setCatfishStampIdx] = useState(0);
   const transformed = transformRageText(sourceText);
   const rageLevel = clamp(Math.floor(transformed.length * 0.9), 12, 100);
+
+  const rollCatfishChaos = () => {
+    setCatfishTopIdx(Math.floor(Math.random() * CATFISH_MEME_TOP.length));
+    setCatfishSubIdx(Math.floor(Math.random() * CATFISH_MEME_SUB.length));
+    setCatfishStampIdx(Math.floor(Math.random() * CATFISH_MEME_STAMP.length));
+  };
+
+  const handleFriendPhoto = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFriendPhoto(reader.result?.toString() || '');
+      rollCatfishChaos();
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
 
   return (
     <div className="app-grid app-grid-small">
       <div className="panel controls-panel">
         <h2>Montage Caption Input</h2>
         <textarea rows={6} value={sourceText} onChange={(event) => setSourceText(event.target.value)} />
-        <p className="panel-caption">Mic mode can be layered in later; text mode keeps the demo instant and reliable.</p>
+        <label className="control-stack">
+          <span>Upload a friend pic — full unhinged catfish incident (parody)</span>
+          <input type="file" accept="image/*" onChange={handleFriendPhoto} />
+        </label>
+        {friendPhoto ? (
+          <button type="button" className="rage-catfish-reroll" onClick={rollCatfishChaos}>
+            Reroll unhinged captions
+          </button>
+        ) : null}
+        <p className="panel-caption">
+          Rage text still prints on the meme. Everything stays in your browser.
+        </p>
       </div>
       <div className="panel rage-output">
-        <div className="rage-meter-bar">
-          <span style={{ width: `${rageLevel}%` }} />
-        </div>
-        <p className="rage-meter-copy">Rage meter: {rageLevel}%</p>
-        <div className="rage-caption">{transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT'}</div>
+        {friendPhoto ? (
+          <div className="rage-catfish-meme">
+            <div className="rage-catfish-sparkles rage-catfish-sparkles-a" aria-hidden>
+              ✨💀✨🩷✨💀✨🩷✨💀✨
+            </div>
+            <div className="rage-catfish-sparkles rage-catfish-sparkles-b" aria-hidden>
+              ⚠️ REAL HUMAN ⚠️ NOT NPC ⚠️ TRUST THE LORE ⚠️
+            </div>
+            <p className="rage-catfish-top">{CATFISH_MEME_TOP[catfishTopIdx]}</p>
+            <div className="rage-catfish-photo-shell">
+              <img className="rage-catfish-photo" src={friendPhoto} alt="Uploaded friend in catfish meme frame" />
+            </div>
+            <p className="rage-catfish-sub">{CATFISH_MEME_SUB[catfishSubIdx]}</p>
+            <p className="rage-catfish-stamp">{CATFISH_MEME_STAMP[catfishStampIdx]}</p>
+            <div className="rage-meter-bar rage-catfish-meter">
+              <span style={{ width: `${rageLevel}%` }} />
+            </div>
+            <p className="rage-meter-copy">Rage meter: {rageLevel}%</p>
+            <div className="rage-caption rage-catfish-rage-line">
+              {transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT'}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="rage-meter-bar">
+              <span style={{ width: `${rageLevel}%` }} />
+            </div>
+            <p className="rage-meter-copy">Rage meter: {rageLevel}%</p>
+            <div className="rage-caption">{transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT'}</div>
+            <p className="panel-caption rage-catfish-hint">
+              Upload a photo for maximum deranged catfish energy (still a joke, don&apos;t actually
+              catfish anyone).
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
