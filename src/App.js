@@ -250,6 +250,12 @@ const INTRO_RANDOM_TAGLINES = [
   'Subscribe before my mom gets home.',
 ];
 
+const DESKTOP_BACKGROUNDS = [
+  { id: 'mlg', label: 'MLG JPG', type: 'image', src: `${process.env.PUBLIC_URL}/mlg.jpg` },
+  { id: 'biebs', label: 'BIEBS MP4', type: 'video', src: `${process.env.PUBLIC_URL}/biebs.mp4` },
+  { id: 'obama', label: 'OBAMA MP4', type: 'video', src: `${process.env.PUBLIC_URL}/obama.mp4` },
+];
+
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -767,6 +773,7 @@ function App() {
     typeof window !== 'undefined' ? window.innerWidth <= 768 : false
   );
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [desktopBackgroundId, setDesktopBackgroundId] = useState('mlg');
   const [windows, setWindows] = useState(buildInitialWindows);
   const [focusOrder, setFocusOrder] = useState([]);
   const [notifications, setNotifications] = useState([
@@ -1035,6 +1042,10 @@ function App() {
       : []
     : focusOrder.filter((id) => windows[id]?.open && !windows[id]?.minimized);
 
+  const activeDesktopBackground =
+    DESKTOP_BACKGROUNDS.find((background) => background.id === desktopBackgroundId) ||
+    DESKTOP_BACKGROUNDS[0];
+
   if (booting) {
     return (
       <main className="boot-screen">
@@ -1058,8 +1069,23 @@ function App() {
   return (
     <main
       className={`cringe-os ${isCompact ? 'compact-mode' : ''}`}
-      style={{ '--desktop-wallpaper': `url(${process.env.PUBLIC_URL}/mlg.jpg)` }}
+      style={{
+        '--desktop-wallpaper':
+          activeDesktopBackground.type === 'image' ? `url(${activeDesktopBackground.src})` : 'none',
+      }}
     >
+      {activeDesktopBackground.type === 'video' ? (
+        <video
+          key={activeDesktopBackground.id}
+          className="desktop-video-wallpaper"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src={activeDesktopBackground.src} type="video/mp4" />
+        </video>
+      ) : null}
       <div className="wallpaper-noise" />
       <header className="desktop-marquee">
         <span>CRINGECRAFT STUDIO</span>
@@ -1230,6 +1256,20 @@ function App() {
         >
           AIRHORN
         </button>
+        <div className="background-toggle-group">
+          {DESKTOP_BACKGROUNDS.map((background) => (
+            <button
+              key={background.id}
+              className={`taskbar-button background-toggle-button ${
+                desktopBackgroundId === background.id ? 'background-toggle-button-active' : ''
+              }`}
+              type="button"
+              onClick={() => setDesktopBackgroundId(background.id)}
+            >
+              {background.label}
+            </button>
+          ))}
+        </div>
         <div className="taskbar-achievement">Achievement unlocked: {achievement} | CHAOS STREAK ACTIVE</div>
       </footer>
     </main>
