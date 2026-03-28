@@ -76,6 +76,11 @@ const CATFISH_MEME_STAMP = [
   '🔥 IF THIS IS FAKE THEN WHY AM I CRYING REAL TEARS RN 🔥',
 ];
 
+const CATFISH_MARQUEE =
+  'TRUST THE PROCESS • MAIN CHARACTER ENERGY • U WOULDNT GET IT • STOP ASKING 4 VC • ILY BBY • NO CAP • RATIO + L + COPE • ANGEL #111 • NOT AN NPC • ';
+
+const CATFISH_FLOAT_EMOJI = ['💀', '🩷', '✨', '🔥', '💋', '🙏', '😭', '💅', '🧬', '⚡'];
+
 const VIRUS_POPUPS = [
   'YOUR PC HAS 37 TROJANS',
   'HOT SINGLES NEAR YOUR REDSTONE FARM',
@@ -1039,6 +1044,20 @@ function RageTranslator() {
       <div className="panel rage-output">
         {friendPhoto ? (
           <div className="rage-catfish-meme">
+            <div className="rage-catfish-chaos-bg" aria-hidden />
+            <div className="rage-catfish-tape rage-catfish-tape--top" aria-hidden>
+              <div className="rage-catfish-tape-track">
+                <span>{CATFISH_MARQUEE}</span>
+                <span>{CATFISH_MARQUEE}</span>
+              </div>
+            </div>
+            <div className="rage-catfish-floaties" aria-hidden>
+              {CATFISH_FLOAT_EMOJI.map((emoji, index) => (
+                <span key={`${emoji}-${index}`} className={`rage-catfish-floaty rage-catfish-floaty--${index}`}>
+                  {emoji}
+                </span>
+              ))}
+            </div>
             <div className="rage-catfish-sparkles rage-catfish-sparkles-a" aria-hidden>
               ✨💀✨🩷✨💀✨🩷✨💀✨
             </div>
@@ -1046,17 +1065,38 @@ function RageTranslator() {
               ⚠️ REAL HUMAN ⚠️ NOT NPC ⚠️ TRUST THE LORE ⚠️
             </div>
             <p className="rage-catfish-top">{CATFISH_MEME_TOP[catfishTopIdx]}</p>
-            <div className="rage-catfish-photo-shell">
-              <img className="rage-catfish-photo" src={friendPhoto} alt="Uploaded friend in catfish meme frame" />
+            <div className="rage-catfish-photo-wrap">
+              <div className="rage-catfish-corner rage-catfish-corner--tl" aria-hidden>
+                REAL
+              </div>
+              <div className="rage-catfish-corner rage-catfish-corner--tr" aria-hidden>
+                NO FAKE
+              </div>
+              <div className="rage-catfish-corner rage-catfish-corner--bl" aria-hidden>
+                100% LEGIT
+              </div>
+              <div className="rage-catfish-corner rage-catfish-corner--br" aria-hidden>
+                TRUST
+              </div>
+              <div className="rage-catfish-photo-shell">
+                <div className="rage-catfish-photo-scan" aria-hidden />
+                <img className="rage-catfish-photo" src={friendPhoto} alt="Uploaded friend in catfish meme frame" />
+              </div>
             </div>
             <p className="rage-catfish-sub">{CATFISH_MEME_SUB[catfishSubIdx]}</p>
             <p className="rage-catfish-stamp">{CATFISH_MEME_STAMP[catfishStampIdx]}</p>
             <div className="rage-meter-bar rage-catfish-meter">
-              <span style={{ width: `${rageLevel}%` }} />
+              <span className="rage-catfish-meter-fill" style={{ width: `${rageLevel}%` }} />
             </div>
-            <p className="rage-meter-copy">Rage meter: {rageLevel}%</p>
+            <p className="rage-meter-copy rage-catfish-meter-label">Rage meter: {rageLevel}%</p>
             <div className="rage-caption rage-catfish-rage-line">
               {transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT'}
+            </div>
+            <div className="rage-catfish-tape rage-catfish-tape--bottom" aria-hidden>
+              <div className="rage-catfish-tape-track rage-catfish-tape-track--reverse">
+                <span>{CATFISH_MARQUEE}</span>
+                <span>{CATFISH_MARQUEE}</span>
+              </div>
             </div>
           </div>
         ) : (
