@@ -130,10 +130,12 @@
   padding: 8px 14px;
   border: 2px solid rgba(255, 255, 255, 0.25);
   background: rgba(16, 7, 36, 0.56);
+  box-shadow: 0 0 24px rgba(255, 20, 147, 0.22), 0 0 16px rgba(0, 246, 255, 0.14);
 }
 
 .desktop-marquee span {
   animation: marquee 14s linear infinite;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
 }
 
 .desktop-icons {
@@ -262,6 +264,7 @@
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: rgba(23, 12, 48, 0.72);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  animation: toastPulse 1.8s ease-in-out infinite alternate;
 }
 
 .ad-popup-layer {
@@ -437,6 +440,7 @@
   font-weight: 800;
   text-transform: uppercase;
   cursor: pointer;
+  box-shadow: 0 0 18px rgba(255, 241, 79, 0.1);
 }
 
 .controls-panel .catfish-export-png:disabled {
@@ -485,6 +489,49 @@
 .controls-panel {
   display: grid;
   gap: 12px;
+}
+
+.app-warning-strip {
+  padding: 8px 10px;
+  border: 2px dashed rgba(255, 241, 79, 0.55);
+  background:
+    linear-gradient(90deg, rgba(255, 20, 147, 0.18), rgba(255, 241, 79, 0.22), rgba(0, 246, 255, 0.16));
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff7a9;
+  animation: chaosStripFlash 1.8s linear infinite;
+}
+
+.preview-sticker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.preview-sticker-row span {
+  padding: 6px 8px;
+  background: linear-gradient(180deg, #fff14f, #ff8a00);
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  color: #12050f;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+}
+
+.preview-sticker-row span:nth-child(2n) {
+  background: linear-gradient(180deg, #00f6ff, #2880ff);
+  color: #fff;
+  transform: rotate(2deg);
+}
+
+.preview-sticker-row span:nth-child(3n) {
+  background: linear-gradient(180deg, #ff5bb2, #c31cff);
+  color: #fff;
+  transform: rotate(-4deg);
 }
 
 .rage-share-box {
@@ -793,6 +840,24 @@
   box-shadow: 0 0 16px rgba(255, 241, 79, 0.42);
 }
 
+.intro-overload-banner {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: 56%;
+  transform: rotate(-7deg) translateZ(80px);
+  padding: 6px 12px;
+  background: linear-gradient(90deg, rgba(255, 20, 147, 0.92), rgba(255, 241, 79, 0.92), rgba(0, 246, 255, 0.92));
+  color: #12050f;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 0.84rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  mix-blend-mode: screen;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.22);
+}
+
 .song-cover {
   min-height: 310px;
   position: relative;
@@ -862,6 +927,14 @@
 .rage-catfish-hint {
   margin-top: 8px;
   margin-bottom: 0;
+}
+
+.preview-sticker-row-rage span {
+  animation: rageStickerJitter 1.1s steps(2) infinite;
+}
+
+.preview-sticker-row-virus span {
+  animation: virusStickerBlink 0.95s steps(2) infinite;
 }
 
 .rage-catfish-reroll {
@@ -1365,12 +1438,49 @@
   padding: 10px 12px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: rgba(9, 4, 23, 0.78);
+  box-shadow: 0 0 20px rgba(0, 246, 255, 0.14), 0 0 30px rgba(255, 20, 147, 0.14);
 }
 
 .taskbar-achievement {
   margin-left: auto;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.85);
+}
+
+@keyframes chaosStripFlash {
+  0%, 100% {
+    filter: saturate(1) brightness(1);
+  }
+  50% {
+    filter: saturate(1.4) brightness(1.16);
+  }
+}
+
+@keyframes toastPulse {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes rageStickerJitter {
+  0%, 100% {
+    transform: rotate(-2deg) translateX(0);
+  }
+  50% {
+    transform: rotate(2deg) translateX(1px);
+  }
+}
+
+@keyframes virusStickerBlink {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(34deg) brightness(1.18);
+  }
 }
 
 @media (max-width: 1100px) {

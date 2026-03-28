@@ -677,6 +677,75 @@ function exportIntroPoster({
   link.click();
 }
 
+async function exportCatfishBannerPng({
+  photo,
+  headlineParts,
+  subbarLine,
+  profiles,
+}) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const image = await loadImage(photo);
+  if (!image) {
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1280;
+  canvas.height = 760;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fefefe';
+  ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+  ctx.strokeStyle = '#1d4f9c';
+  ctx.lineWidth = 10;
+  ctx.strokeRect(26, 26, canvas.width - 52, canvas.height - 52);
+
+  let cursorX = 70;
+  ctx.textBaseline = 'top';
+  ctx.font = '900 54px Arial, sans-serif';
+  headlineParts.forEach((part) => {
+    ctx.fillStyle = part.red ? '#ff1e1e' : '#111';
+    ctx.fillText(part.t, cursorX, 38);
+    cursorX += ctx.measureText(part.t).width;
+  });
+
+  ctx.fillStyle = '#3d79bc';
+  ctx.fillRect(26, 138, canvas.width - 52, 72);
+  ctx.fillStyle = '#fff';
+  ctx.font = '500 34px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(subbarLine, canvas.width / 2, 156);
+
+  const profileWidth = 350;
+  const startX = 66;
+  const imageY = 268;
+  for (let index = 0; index < 3; index += 1) {
+    const profile = profiles[index];
+    const x = startX + index * 382;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#3d79bc';
+    ctx.font = '500 20px Arial, sans-serif';
+    ctx.fillText(profile.name, x, 226);
+    ctx.fillStyle = '#222';
+    ctx.font = '500 18px Arial, sans-serif';
+    ctx.fillText(`${profile.age}, ${profile.miles} mile${profile.miles === 1 ? '' : 's'} away`, x, 252);
+    ctx.drawImage(image, x, imageY, profileWidth, 350);
+  }
+
+  const link = document.createElement('a');
+  link.download = `catfish-banner-parody-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
 function buildInitialWindows() {
   return APP_DEFS.reduce((accumulator, app, index) => {
     accumulator[app.id] = {
@@ -996,6 +1065,8 @@ function App() {
         <span>CRINGECRAFT STUDIO</span>
         <span>100% LEGIT GAMER TOOL</span>
         <span>POWERED BY DORITOCORE TECHNOLOGY</span>
+        <span>FREE INTRO MAKER NO VIRUS</span>
+        <span>CLICK EVERYTHING FOR MAXIMUM DAMAGE</span>
       </header>
 
       <section className="desktop-icons" aria-label="Desktop apps">
@@ -1018,7 +1089,7 @@ function App() {
       <div className="notifications-layer">
         {notifications.map((notice) => (
           <div className="toast" key={notice.id}>
-            <strong>OS ALERT</strong>
+            <strong>OS ALERT // LEVEL: ABSURD</strong>
             <span>{notice.text}</span>
           </div>
         ))}
@@ -1150,7 +1221,7 @@ function App() {
           type="button"
           onClick={() => setSoundEnabled((value) => !value)}
         >
-          {soundEnabled ? 'Sound: ON' : 'Sound: OFF'}
+          {soundEnabled ? 'SOUND: MAXIMUM' : 'SOUND: COWARD MODE'}
         </button>
         <button
           className="taskbar-button"
@@ -1159,7 +1230,7 @@ function App() {
         >
           AIRHORN
         </button>
-        <div className="taskbar-achievement">Achievement unlocked: {achievement}</div>
+        <div className="taskbar-achievement">Achievement unlocked: {achievement} | CHAOS STREAK ACTIVE</div>
       </footer>
     </main>
   );
@@ -1349,6 +1420,7 @@ function ThumbnailGenerator({ soundEnabled }) {
     <div className="app-grid app-grid-thumbnail">
       <div className="panel controls-panel">
         <h2>Thumbnail Terror Lab</h2>
+        <div className="app-warning-strip">WARNING: THIS TOOL MAY INCREASE YOUR YOUTUBE EGO BY 9000%</div>
         <label className="control-stack">
           <span>Source image</span>
           <input type="file" accept="image/*" onChange={handleImageUpload} />
@@ -1359,10 +1431,10 @@ function ThumbnailGenerator({ soundEnabled }) {
         </label>
         <div className="button-row">
           <button type="button" onClick={() => setTitle(randomItem(CLICKBAIT_TITLES))}>
-            Randomize drama
+            Reroll fake controversy
           </button>
           <button type="button" onClick={exportImage}>
-            Export PNG
+            Export cursed PNG
           </button>
         </div>
         <label className="slider-row">
@@ -1386,6 +1458,11 @@ function ThumbnailGenerator({ soundEnabled }) {
       </div>
       <div className="panel preview-panel">
         <canvas ref={canvasRef} width="640" height="360" />
+        <div className="preview-sticker-row">
+          <span>SHOCKED FACE ENERGY</span>
+          <span>REAL HEROBRINE SIGHTING</span>
+          <span>999% CTR</span>
+        </div>
         <p className="panel-caption">Approved by 9/10 Minecraft YouTubers and one suspicious diamond merchant.</p>
       </div>
     </div>
@@ -1465,6 +1542,7 @@ function IntroMaker({ soundEnabled }) {
     <div className="app-grid app-grid-intro">
       <div className="panel controls-panel">
         <h2>3D Intro Maker Controls</h2>
+        <div className="app-warning-strip">FREE 3D INTRO MAKER // TOTALLY SAFE // ZERO TASTE DETECTED</div>
         <label className="control-stack">
           <span>Channel name</span>
           <input value={channelName} onChange={(event) => setChannelName(event.target.value)} />
@@ -1506,13 +1584,13 @@ function IntroMaker({ soundEnabled }) {
         </label>
         <div className="button-row">
           <button type="button" onClick={generateIntro}>
-            Generate intro
+            GENERATE INTRO
           </button>
           <button type="button" onClick={replayIntro}>
-            Replay intro
+            REPLAY CHAOS
           </button>
           <button type="button" onClick={randomizeIntro}>
-            Randomize
+            RANDOMIZE SLOP
           </button>
           <button
             type="button"
@@ -1526,10 +1604,10 @@ function IntroMaker({ soundEnabled }) {
               })
             }
           >
-            Screenshot
+            SCREENSHOT FLEX
           </button>
           <button type="button" onClick={openFullscreen}>
-            Fullscreen
+            FULLSCREEN PANIC
           </button>
         </div>
         <p className="panel-caption">
@@ -1613,6 +1691,7 @@ function IntroMaker({ soundEnabled }) {
               <span>SEED #{seed}</span>
             </div>
             <div className="intro-stamp-3d">{themeConfig.stamp}</div>
+            <div className="intro-overload-banner">SUBSCRIBE // EPIC // OMG // 2016 FOREVER // NO VIRUS //</div>
           </div>
         </div>
       </div>
@@ -1670,6 +1749,7 @@ function RageTranslator() {
     <div className="app-grid app-grid-small">
       <div className="panel controls-panel">
         <h2>Montage Caption Input</h2>
+        <div className="app-warning-strip">RAGEBAITER 9000 // CROP CONTEXT // FARM REACTIONS // PROFIT</div>
         <textarea rows={6} value={sourceText} onChange={(event) => setSourceText(event.target.value)} />
         <label className="control-stack">
           <span>Upload a friend pic — full unhinged catfish incident (parody)</span>
@@ -1759,6 +1839,11 @@ function RageTranslator() {
             </div>
             <p className="rage-meter-copy">Rage meter: {rageLevel}%</p>
             <div className="rage-caption">{transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT'}</div>
+            <div className="preview-sticker-row preview-sticker-row-rage">
+              <span>OUTRAGE FARM</span>
+              <span>TAKEN OUT OF CONTEXT</span>
+              <span>1000 COMMENTS LOADING</span>
+            </div>
             <p className="panel-caption rage-catfish-hint">
               Upload a photo for maximum deranged catfish energy (still a joke, don&apos;t actually
               catfish anyone).
@@ -1778,7 +1863,6 @@ function VirusSimulator() {
   const [bannerSubbarIdx, setBannerSubbarIdx] = useState(0);
   const [bannerProfiles, setBannerProfiles] = useState(() => rollCatfishBannerProfiles());
   const [exporting, setExporting] = useState(false);
-  const bannerExportRef = useRef(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -1809,24 +1893,17 @@ function VirusSimulator() {
   };
 
   const handleExportBannerPng = async () => {
-    const node = bannerExportRef.current;
-    if (!node || !photo || exporting) {
+    if (!photo || exporting) {
       return;
     }
     setExporting(true);
     try {
-      const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(node, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#f5f5f5',
-        logging: false,
+      await exportCatfishBannerPng({
+        photo,
+        headlineParts: CATFISH_BANNER_HEADLINES[bannerHeadlineIdx],
+        subbarLine: CATFISH_SUBBAR_LINES[bannerSubbarIdx],
+        profiles: bannerProfiles,
       });
-      const link = document.createElement('a');
-      link.download = `catfish-banner-parody-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
     } catch (error) {
       console.error(error);
     } finally {
@@ -1838,13 +1915,14 @@ function VirusSimulator() {
     <div className="app-grid app-grid-small">
       <div className="panel controls-panel">
         <h2>Parody spam banner factory</h2>
+        <div className="app-warning-strip">THIS IS A PARODY // EXTREMELY STUPID // DO NOT TRUST THE INTERNET</div>
         <label className="control-stack">
           <span>Upload a pic — fake &quot;hot singles&quot; ad (same face, three names)</span>
           <input type="file" accept="image/*" onChange={handleUpload} />
         </label>
         {photo ? (
           <button type="button" className="rage-catfish-reroll" onClick={rollBannerAd}>
-            Reroll banner ad chaos
+            REROLL BANNER AD CHAOS
           </button>
         ) : null}
         <div className="virus-progress">
@@ -1864,12 +1942,13 @@ function VirusSimulator() {
       </div>
       <div className="panel virus-scene">
         <div className="virus-popup">{popup}</div>
+        <div className="preview-sticker-row preview-sticker-row-virus">
+          <span>DOWNLOAD MORE RAM</span>
+          <span>100% SAFE PROBABLY</span>
+          <span>SCREAMING INTERNALLY</span>
+        </div>
         {photo ? (
-          <div
-            ref={bannerExportRef}
-            className="rage-catfish-banner-root"
-            id="catfish-parody-banner-virus"
-          >
+          <div className="rage-catfish-banner-root" id="catfish-parody-banner-virus">
             <div className="rage-catfish-banner-ad">
               <div className="catfish-banner-window-bar" aria-hidden>
                 <span className="catfish-banner-window-title">hot_singles_near_you.htm</span>
