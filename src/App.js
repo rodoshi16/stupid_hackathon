@@ -1,23 +1,782 @@
-import logo from './logo.svg';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 
+const APP_DEFS = [
+  { id: 'thumbnail', icon: '⛏️', label: 'Thumbnail Forge', accent: 'diamond' },
+  { id: 'intro', icon: '🌈', label: 'Intro Blaster', accent: 'fire' },
+  { id: 'song', icon: '🎵', label: 'Parody Jukebox', accent: 'slime' },
+  { id: 'rage', icon: '💥', label: 'Rage Translator', accent: 'danger' },
+  { id: 'virus', icon: '☣️', label: 'Totally Safe Download', accent: 'warning' },
+];
+
+const CLICKBAIT_TITLES = [
+  'HE STOLE MY GIRLFRIEND IN SKYWARS?!',
+  'I FOUND HEROBRINE AT 3AM',
+  'LUCKY BLOCKS RUINED MY LIFE',
+  'I ACCIDENTALLY DUPED 999 DIAMONDS',
+  'MOM WALKED IN DURING MY CLUTCH',
+  'THIS BEDWARS HACK CHANGED HUMAN HISTORY',
+];
+
+const SONG_TITLES = [
+  'Revenge 2',
+  'Creeper in My Walls',
+  'Mine All Night',
+  "Don't Dig Straight Down (Emotional Version)",
+  'Diamond Tears AMV',
+  'My Heart Is In The Nether',
+];
+
+const SONG_CHORUSES = [
+  'Creeper in my hallway, griefing my soul, swing that pickaxe baby, never let me go.',
+  'Mine mine mine till the sunrise hurts, crafted these feelings in a dirt block shirt.',
+  'Girl you got me lagging, redstone in my chest, respawn in your village and I will do the rest.',
+  'We fell in lava but the love stayed on, now I am autotuned inside this parody song.',
+];
+
+const SONG_GENRES = ['Dubstep Gospel', 'Sad Block Pop', 'MLG Trap', 'Galaxy Screamo', 'Optifine R&B'];
+
+const RAGE_REPLACEMENTS = [
+  ['destroyed', 'rekt'],
+  ['easy', 'ez'],
+  ['wow', 'omg'],
+  ['cool', 'savage'],
+  ['amazing', 'insane'],
+  ['friend', 'squad member'],
+  ['good', 'cracked'],
+];
+
+const VIRUS_POPUPS = [
+  'YOUR PC HAS 37 TROJANS',
+  'HOT SINGLES NEAR YOUR REDSTONE FARM',
+  'CLICK TO INSTALL OPTIFINE ULTRA HD 9000',
+  'SYSTEM32 FEELS LONELY',
+  'FREE ROBUX NO HUMAN VERIFICATION',
+  '4 HOT SINGLE MEN NEAR YOU',
+];
+
+const DESKTOP_NOTICES = [
+  'Certified MLG software initialized successfully.',
+  'Rainbow cursor trail driver updated to v6.9.',
+  'Warning: cringe levels exceeding safe government limits.',
+  'Dubstep engine warmed up and ready for deployment.',
+];
+
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function generateSongCard() {
+  return {
+    title: randomItem(SONG_TITLES),
+    chorus: randomItem(SONG_CHORUSES),
+    genre: randomItem(SONG_GENRES),
+    cringe: Math.floor(Math.random() * 31) + 69,
+    popularity: `${Math.floor(Math.random() * 8) + 2}.${Math.floor(Math.random() * 10)}M fake views`,
+    palette: [
+      `hsl(${Math.floor(Math.random() * 360)} 95% 55%)`,
+      `hsl(${Math.floor(Math.random() * 360)} 100% 65%)`,
+    ],
+  };
+}
+
+function transformRageText(input) {
+  let output = input;
+  RAGE_REPLACEMENTS.forEach(([from, to]) => {
+    output = output.replace(new RegExp(`\\b${from}\\b`, 'gi'), to);
+  });
+  return output
+    .split(' ')
+    .map((word, index) => (index % 4 === 3 ? `${word.toUpperCase()}!!!` : word))
+    .join(' ');
+}
+
+function playToneSequence(enabled, frequencies, duration = 0.12) {
+  if (!enabled || typeof window === 'undefined') {
+    return;
+  }
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) {
+    return;
+  }
+
+  const context = new AudioContextClass();
+  const start = context.currentTime;
+
+  frequencies.forEach((frequency, index) => {
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+    osc.type = index % 2 === 0 ? 'square' : 'sawtooth';
+    osc.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, start + index * duration);
+    gain.gain.exponentialRampToValueAtTime(0.06, start + index * duration + 0.01);
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      start + index * duration + duration
+    );
+    osc.connect(gain);
+    gain.connect(context.destination);
+    osc.start(start + index * duration);
+    osc.stop(start + index * duration + duration);
+  });
+}
+
 function App() {
+  const [booting, setBooting] = useState(true);
+  const [bootProgress, setBootProgress] = useState(7);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [openApps, setOpenApps] = useState(['thumbnail']);
+  const [focusedApp, setFocusedApp] = useState('thumbnail');
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: 'CringeCraft OS recovered from a dusty 2016 USB stick.' },
+  ]);
+  const [achievement, setAchievement] = useState('Viral in 2016');
+  const [windowPositions, setWindowPositions] = useState({
+    thumbnail: { x: 64, y: 92 },
+    intro: { x: 240, y: 126 },
+    song: { x: 190, y: 210 },
+    rage: { x: 500, y: 88 },
+    virus: { x: 540, y: 238 },
+  });
+  const dragRef = useRef(null);
+
+  useEffect(() => {
+    const progressTimer = window.setInterval(() => {
+      setBootProgress((value) => {
+        const next = value + Math.floor(Math.random() * 16) + 6;
+        return next >= 100 ? 100 : next;
+      });
+    }, 230);
+    const bootTimer = window.setTimeout(() => {
+      setBooting(false);
+      playToneSequence(soundEnabled, [392, 587, 784], 0.14);
+    }, 2400);
+
+    return () => {
+      window.clearInterval(progressTimer);
+      window.clearTimeout(bootTimer);
+    };
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    if (booting) {
+      return undefined;
+    }
+
+    let noticeId = 2;
+    const timer = window.setInterval(() => {
+      const nextNotice = { id: noticeId, text: randomItem(DESKTOP_NOTICES) };
+      noticeId += 1;
+      setNotifications((current) => [nextNotice, ...current].slice(0, 3));
+      setAchievement(randomItem(['Certified MLG', 'Dubstep Engineer', 'Trojans Detected', 'Thumbnail Menace']));
+    }, 6500);
+
+    return () => window.clearInterval(timer);
+  }, [booting]);
+
+  useEffect(() => {
+    if (!dragRef.current) {
+      return undefined;
+    }
+
+    const handleMove = (event) => {
+      if (!dragRef.current) {
+        return;
+      }
+      const { id, offsetX, offsetY } = dragRef.current;
+      setWindowPositions((current) => ({
+        ...current,
+        [id]: {
+          x: clamp(event.clientX - offsetX, 12, window.innerWidth - 380),
+          y: clamp(event.clientY - offsetY, 28, window.innerHeight - 280),
+        },
+      }));
+    };
+
+    const handleUp = () => {
+      dragRef.current = null;
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', handleUp);
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleUp);
+    };
+  }, []);
+
+  const desktopApps = useMemo(
+    () =>
+      APP_DEFS.map((app) => ({
+        ...app,
+        open: openApps.includes(app.id),
+      })),
+    [openApps]
+  );
+
+  const openWindow = (id) => {
+    setOpenApps((current) => (current.includes(id) ? current : [...current, id]));
+    setFocusedApp(id);
+    playToneSequence(soundEnabled, [660, 880], 0.08);
+  };
+
+  const closeWindow = (id) => {
+    setOpenApps((current) => current.filter((item) => item !== id));
+    setFocusedApp((current) => (current === id ? 'thumbnail' : current));
+  };
+
+  const startDrag = (event, id) => {
+    const rect = event.currentTarget.parentElement.getBoundingClientRect();
+    dragRef.current = {
+      id,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+    };
+    setFocusedApp(id);
+  };
+
+  if (booting) {
+    return (
+      <main className="boot-screen">
+        <div className="boot-glow" />
+        <div className="boot-panel">
+          <p className="boot-kicker">CringeCraft BIOS v20.16</p>
+          <h1>Recovering forbidden creator laptop...</h1>
+          <p className="boot-copy">
+            Loading Doritocore drivers, rainbow gamer overlays, and definitely
+            real antivirus protection.
+          </p>
+          <div className="boot-bar">
+            <span style={{ width: `${bootProgress}%` }} />
+          </div>
+          <p className="boot-progress">{bootProgress}% cringe calibrated</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <main className="cringe-os">
+      <div className="wallpaper-noise" />
+      <header className="desktop-marquee">
+        <span>CRINGECRAFT STUDIO</span>
+        <span>100% LEGIT GAMER TOOL</span>
+        <span>POWERED BY DORITOCORE TECHNOLOGY</span>
       </header>
+
+      <section className="desktop-icons" aria-label="Desktop apps">
+        {desktopApps.map((app) => (
+          <button
+            key={app.id}
+            className={`desktop-icon accent-${app.accent}`}
+            onClick={() => openWindow(app.id)}
+            type="button"
+          >
+            <span className="desktop-icon-emoji" aria-hidden="true">
+              {app.icon}
+            </span>
+            <span>{app.label}</span>
+          </button>
+        ))}
+      </section>
+
+      <div className="notifications-layer">
+        {notifications.map((notice) => (
+          <div className="toast" key={notice.id}>
+            <strong>OS ALERT</strong>
+            <span>{notice.text}</span>
+          </div>
+        ))}
+      </div>
+
+      <section className="window-layer">
+        {openApps.includes('thumbnail') && (
+          <Window
+            id="thumbnail"
+            title="Minecraft Thumbnail Forge.exe"
+            position={windowPositions.thumbnail}
+            focused={focusedApp === 'thumbnail'}
+            onFocus={setFocusedApp}
+            onClose={closeWindow}
+            onDragStart={startDrag}
+          >
+            <ThumbnailGenerator soundEnabled={soundEnabled} />
+          </Window>
+        )}
+
+        {openApps.includes('intro') && (
+          <Window
+            id="intro"
+            title="2016 Intro Blaster Pro"
+            position={windowPositions.intro}
+            focused={focusedApp === 'intro'}
+            onFocus={setFocusedApp}
+            onClose={closeWindow}
+            onDragStart={startDrag}
+          >
+            <IntroMaker soundEnabled={soundEnabled} />
+          </Window>
+        )}
+
+        {openApps.includes('song') && (
+          <Window
+            id="song"
+            title="Minecraft Parody Jukebox"
+            position={windowPositions.song}
+            focused={focusedApp === 'song'}
+            onFocus={setFocusedApp}
+            onClose={closeWindow}
+            onDragStart={startDrag}
+          >
+            <SongGenerator soundEnabled={soundEnabled} />
+          </Window>
+        )}
+
+        {openApps.includes('rage') && (
+          <Window
+            id="rage"
+            title="Gamer Rage Translator"
+            position={windowPositions.rage}
+            focused={focusedApp === 'rage'}
+            onFocus={setFocusedApp}
+            onClose={closeWindow}
+            onDragStart={startDrag}
+          >
+            <RageTranslator />
+          </Window>
+        )}
+
+        {openApps.includes('virus') && (
+          <Window
+            id="virus"
+            title="TotallySafeDownload.biz"
+            position={windowPositions.virus}
+            focused={focusedApp === 'virus'}
+            onFocus={setFocusedApp}
+            onClose={closeWindow}
+            onDragStart={startDrag}
+          >
+            <VirusSimulator soundEnabled={soundEnabled} />
+          </Window>
+        )}
+      </section>
+
+      <footer className="taskbar">
+        <div className="start-pill">START</div>
+        <button
+          className="taskbar-button"
+          type="button"
+          onClick={() => setSoundEnabled((value) => !value)}
+        >
+          {soundEnabled ? 'Sound: ON' : 'Sound: OFF'}
+        </button>
+        <button
+          className="taskbar-button"
+          type="button"
+          onClick={() => playToneSequence(soundEnabled, [220, 330, 660, 990], 0.09)}
+        >
+          AIRHORN
+        </button>
+        <div className="taskbar-achievement">Achievement unlocked: {achievement}</div>
+      </footer>
+    </main>
+  );
+}
+
+function Window({ id, title, position, focused, onFocus, onClose, onDragStart, children }) {
+  return (
+    <article
+      className={`window-frame ${focused ? 'focused' : ''}`}
+      style={{ left: position.x, top: position.y, zIndex: focused ? 20 : 10 }}
+      onPointerDown={() => onFocus(id)}
+    >
+      <div className="window-titlebar" onPointerDown={(event) => onDragStart(event, id)}>
+        <span>{title}</span>
+        <div className="window-actions">
+          <button type="button" onClick={() => onFocus(id)}>
+            _
+          </button>
+          <button type="button" onClick={() => onClose(id)}>
+            X
+          </button>
+        </div>
+      </div>
+      <div className="window-body">{children}</div>
+    </article>
+  );
+}
+
+function ThumbnailGenerator({ soundEnabled }) {
+  const canvasRef = useRef(null);
+  const [imageSrc, setImageSrc] = useState('');
+  const [title, setTitle] = useState(CLICKBAIT_TITLES[0]);
+  const [deepFried, setDeepFried] = useState(true);
+  const [cringe, setCringe] = useState(88);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return undefined;
+    }
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const paintFrame = (img) => {
+      ctx.clearRect(0, 0, width, height);
+      const bg = ctx.createLinearGradient(0, 0, width, height);
+      bg.addColorStop(0, '#00d2ff');
+      bg.addColorStop(0.45, '#ff00c8');
+      bg.addColorStop(1, '#ffdf00');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      if (img) {
+        ctx.save();
+        if (deepFried) {
+          ctx.filter = `contrast(1.4) saturate(${1 + cringe / 35}) brightness(1.05)`;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+        ctx.fillRect(20, 20, width - 40, height - 40);
+        ctx.fillStyle = '#fff7a9';
+        ctx.font = 'bold 38px Impact, fantasy';
+        ctx.fillText('UPLOAD YOUR', 36, 150);
+        ctx.fillText('MOST CURSED SCREENSHOT', 36, 205);
+      }
+
+      if (deepFried) {
+        for (let i = 0; i < 18; i += 1) {
+          ctx.fillStyle = `hsla(${Math.random() * 360} 100% 60% / 0.16)`;
+          ctx.fillRect(Math.random() * width, Math.random() * height, 40, 18);
+        }
+      }
+
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 12;
+      ctx.fillStyle = '#fff941';
+      ctx.font = `900 ${56 + cringe / 7}px Impact, Haettenschweiler, fantasy`;
+      const lines = title.match(/.{1,16}(\s|$)/g) || [title];
+      lines.slice(0, 3).forEach((line, index) => {
+        const y = 88 + index * 72;
+        ctx.strokeText(line.trim(), 30, y);
+        ctx.fillText(line.trim(), 30, y);
+      });
+
+      ctx.fillStyle = '#ff1616';
+      ctx.beginPath();
+      ctx.moveTo(width - 176, height - 40);
+      ctx.lineTo(width - 72, height - 152);
+      ctx.lineTo(width - 106, height - 152);
+      ctx.lineTo(width - 36, height - 224);
+      ctx.lineTo(width - 92, height - 170);
+      ctx.lineTo(width - 132, height - 170);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(width - 82, 76, 50, 0, Math.PI * 2);
+      ctx.fillStyle = '#4bfbff';
+      ctx.fill();
+      ctx.strokeStyle = '#dbffff';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 24px Impact, fantasy';
+      ctx.fillText('999', width - 104, 84);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(90, height - 96, 62, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(66, height - 110, 10, 0, Math.PI * 2);
+      ctx.arc(114, height - 110, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.arc(90, height - 78, 20, 0, Math.PI);
+      ctx.stroke();
+    };
+
+    if (!imageSrc) {
+      paintFrame(null);
+      return undefined;
+    }
+
+    const img = new Image();
+    img.onload = () => paintFrame(img);
+    img.src = imageSrc;
+    return undefined;
+  }, [imageSrc, title, deepFried, cringe]);
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setImageSrc(reader.result?.toString() || '');
+    reader.readAsDataURL(file);
+  };
+
+  const exportImage = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+    const link = document.createElement('a');
+    link.download = 'cringecraft-thumbnail.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    playToneSequence(soundEnabled, [523, 659, 784], 0.08);
+  };
+
+  return (
+    <div className="app-grid app-grid-thumbnail">
+      <div className="panel controls-panel">
+        <h2>Thumbnail Terror Lab</h2>
+        <label className="control-stack">
+          <span>Source image</span>
+          <input type="file" accept="image/*" onChange={handleImageUpload} />
+        </label>
+        <label className="control-stack">
+          <span>Clickbait headline</span>
+          <textarea value={title} onChange={(event) => setTitle(event.target.value)} rows={3} />
+        </label>
+        <div className="button-row">
+          <button type="button" onClick={() => setTitle(randomItem(CLICKBAIT_TITLES))}>
+            Randomize drama
+          </button>
+          <button type="button" onClick={exportImage}>
+            Export PNG
+          </button>
+        </div>
+        <label className="slider-row">
+          <span>Cringe intensity: {cringe}</span>
+          <input
+            type="range"
+            min="40"
+            max="100"
+            value={cringe}
+            onChange={(event) => setCringe(Number(event.target.value))}
+          />
+        </label>
+        <label className="toggle-row">
+          <input
+            type="checkbox"
+            checked={deepFried}
+            onChange={(event) => setDeepFried(event.target.checked)}
+          />
+          <span>Deep fry absolutely everything</span>
+        </label>
+      </div>
+      <div className="panel preview-panel">
+        <canvas ref={canvasRef} width="640" height="360" />
+        <p className="panel-caption">Approved by 9/10 Minecraft YouTubers and one suspicious diamond merchant.</p>
+      </div>
+    </div>
+  );
+}
+
+function IntroMaker({ soundEnabled }) {
+  const [channelName, setChannelName] = useState('XxShadowSniperProxX');
+  const [tagline, setTagline] = useState('No scope. No mercy. No homework.');
+  const [favoriteColor, setFavoriteColor] = useState('#00f6ff');
+  const [vibe, setVibe] = useState('galaxy');
+  const [replayKey, setReplayKey] = useState(0);
+
+  const replayIntro = () => {
+    setReplayKey((value) => value + 1);
+    playToneSequence(soundEnabled, [330, 392, 494, 660], 0.11);
+  };
+
+  return (
+    <div className="app-grid app-grid-intro">
+      <div className="panel controls-panel">
+        <h2>Intro Blaster Controls</h2>
+        <label className="control-stack">
+          <span>Channel name</span>
+          <input value={channelName} onChange={(event) => setChannelName(event.target.value)} />
+        </label>
+        <label className="control-stack">
+          <span>Tagline</span>
+          <input value={tagline} onChange={(event) => setTagline(event.target.value)} />
+        </label>
+        <label className="control-stack">
+          <span>Favorite color</span>
+          <input type="color" value={favoriteColor} onChange={(event) => setFavoriteColor(event.target.value)} />
+        </label>
+        <label className="control-stack">
+          <span>Vibe</span>
+          <select value={vibe} onChange={(event) => setVibe(event.target.value)}>
+            <option value="hacker">Hacker</option>
+            <option value="gaming">Gaming</option>
+            <option value="neon">Neon</option>
+            <option value="galaxy">Galaxy</option>
+            <option value="fire">Fire</option>
+          </select>
+        </label>
+        <div className="button-row">
+          <button type="button" onClick={replayIntro}>
+            Replay intro
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setChannelName('iiToxicDragonHDii');
+              setTagline('Road to 1M before dinner');
+              setVibe('fire');
+              replayIntro();
+            }}
+          >
+            Make it worse
+          </button>
+        </div>
+      </div>
+      <div className="panel intro-preview">
+        <div className={`intro-scene vibe-${vibe}`} key={replayKey} style={{ '--intro-color': favoriteColor }}>
+          <div className="intro-particles" />
+          <div className="intro-ring" />
+          <div className="intro-name">{channelName}</div>
+          <div className="intro-tagline">{tagline}</div>
+          <div className="intro-stamp">SUBSCRIBE NOW NO VIRUS</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SongGenerator({ soundEnabled }) {
+  const [song, setSong] = useState(() => generateSongCard());
+
+  const regenerate = () => {
+    setSong(generateSongCard());
+    playToneSequence(soundEnabled, [262, 330, 392, 523], 0.09);
+  };
+
+  return (
+    <div className="app-grid app-grid-song">
+      <div className="panel song-cover-panel">
+        <div
+          className="song-cover"
+          style={{
+            background: `radial-gradient(circle at top, ${song.palette[0]}, transparent 45%), linear-gradient(135deg, ${song.palette[1]}, #090011)`,
+          }}
+        >
+          <div className="song-cover-grid" />
+          <div className="song-cover-title">{song.title}</div>
+          <div className="song-cover-subtitle">{song.genre}</div>
+        </div>
+      </div>
+      <div className="panel controls-panel">
+        <h2>Parody Song Forge</h2>
+        <p className="song-meta">{song.popularity}</p>
+        <p className="song-chorus">"{song.chorus}"</p>
+        <div className="cringe-meter">
+          <span>Cringe rating</span>
+          <strong>{song.cringe}/100</strong>
+        </div>
+        <div className="button-row">
+          <button type="button" onClick={regenerate}>
+            Regenerate anthem
+          </button>
+          <button type="button" onClick={() => playToneSequence(soundEnabled, [220, 262, 294, 262], 0.18)}>
+            Play chorus
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RageTranslator() {
+  const [sourceText, setSourceText] = useState('Wow that was a cool and easy win for my friend');
+  const transformed = transformRageText(sourceText);
+  const rageLevel = clamp(Math.floor(transformed.length * 0.9), 12, 100);
+
+  return (
+    <div className="app-grid app-grid-small">
+      <div className="panel controls-panel">
+        <h2>Montage Caption Input</h2>
+        <textarea rows={6} value={sourceText} onChange={(event) => setSourceText(event.target.value)} />
+        <p className="panel-caption">Mic mode can be layered in later; text mode keeps the demo instant and reliable.</p>
+      </div>
+      <div className="panel rage-output">
+        <div className="rage-meter-bar">
+          <span style={{ width: `${rageLevel}%` }} />
+        </div>
+        <p className="rage-meter-copy">Rage meter: {rageLevel}%</p>
+        <div className="rage-caption">{transformed || 'TYPE SOMETHING TO GET ABSOLUTELY REKT'}</div>
+      </div>
+    </div>
+  );
+}
+
+function VirusSimulator({ soundEnabled }) {
+  const [photo, setPhoto] = useState('');
+  const [popup, setPopup] = useState(VIRUS_POPUPS[0]);
+  const [progress, setProgress] = useState(14);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setPopup(randomItem(VIRUS_POPUPS));
+      setProgress((current) => (current >= 100 ? 11 : current + Math.floor(Math.random() * 23)));
+    }, 1800);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const handleUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setPhoto(reader.result?.toString() || '');
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="app-grid app-grid-small">
+      <div className="panel controls-panel">
+        <h2>Clearly Fake Scam Builder</h2>
+        <label className="control-stack">
+          <span>Upload friend photo for parody banner ads</span>
+          <input type="file" accept="image/*" onChange={handleUpload} />
+        </label>
+        <div className="virus-progress">
+          <div className="virus-progress-bar">
+            <span style={{ width: `${clamp(progress, 0, 100)}%` }} />
+          </div>
+          <p>Installing Optifine Ultra HD 9000: {clamp(progress, 0, 100)}%</p>
+        </div>
+        <button type="button" onClick={() => playToneSequence(soundEnabled, [110, 98, 87, 73], 0.1)}>
+          Trigger suspicious noise
+        </button>
+      </div>
+      <div className="panel virus-scene">
+        <div className="virus-popup">{popup}</div>
+        <div className="virus-ad-grid">
+          <div className="virus-ad">FREE ROBUX</div>
+          <div className="virus-ad">
+            {photo ? <img src={photo} alt="Uploaded friend" /> : <span>YOUR FACE HERE</span>}
+          </div>
+          <div className="virus-ad">HOT SINGLES NEAR YOUR BASE</div>
+          <div className="virus-ad">DOWNLOAD MORE RAM</div>
+        </div>
+        <p className="panel-caption">
+          Parody only. No passwords, no payment forms, no fake credential theft nonsense.
+        </p>
+      </div>
     </div>
   );
 }

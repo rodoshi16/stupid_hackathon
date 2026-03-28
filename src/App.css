@@ -1,38 +1,645 @@
-.App {
-  text-align: center;
+:root {
+  --bg-dark: #090016;
+  --panel: rgba(16, 10, 35, 0.82);
+  --panel-border: rgba(255, 255, 255, 0.28);
+  --text: #fdf7ff;
+  --yellow: #fff14f;
+  --pink: #ff47b8;
+  --cyan: #38f6ff;
+  --green: #71ff76;
+  --orange: #ff8c28;
 }
 
-.App-logo {
-  height: 40vmin;
+.cringe-os,
+.boot-screen {
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(33, 192, 255, 0.42), transparent 25%),
+    radial-gradient(circle at 80% 15%, rgba(255, 20, 147, 0.42), transparent 25%),
+    radial-gradient(circle at 50% 70%, rgba(255, 255, 120, 0.24), transparent 28%),
+    linear-gradient(160deg, #090016, #16062a 35%, #052340 70%, #000 100%);
+}
+
+.boot-screen {
+  display: grid;
+  place-items: center;
+}
+
+.boot-glow,
+.wallpaper-noise {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.boot-glow {
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 48%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 2px,
+      transparent 2px,
+      transparent 4px
+    );
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.wallpaper-noise {
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle at 15% 30%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px),
+    radial-gradient(circle at 60% 75%, rgba(255, 255, 255, 0.15) 0 1px, transparent 1px);
+  background-size: 160px 160px, 210px 210px, 250px 250px;
+  animation: drift 16s linear infinite;
+}
+
+.boot-panel,
+.window-frame,
+.desktop-icon,
+.toast,
+.taskbar,
+.desktop-marquee {
+  backdrop-filter: blur(10px);
+}
+
+.boot-panel {
+  width: min(580px, calc(100vw - 32px));
+  padding: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, rgba(7, 4, 18, 0.95), rgba(20, 7, 41, 0.9));
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5), 0 0 34px rgba(84, 236, 255, 0.25);
+}
+
+.boot-kicker,
+.boot-progress,
+.panel-caption,
+.song-meta,
+.rage-meter-copy {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.boot-panel h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  line-height: 0.95;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.boot-copy {
+  max-width: 48ch;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.boot-bar,
+.virus-progress-bar,
+.rage-meter-bar {
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.boot-bar span,
+.virus-progress-bar span,
+.rage-meter-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--pink), var(--yellow));
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.4);
+}
+
+.desktop-marquee {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
   display: flex;
-  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  padding: 8px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: rgba(16, 7, 36, 0.56);
+}
+
+.desktop-marquee span {
+  animation: marquee 14s linear infinite;
+}
+
+.desktop-icons {
+  position: absolute;
+  top: 78px;
+  left: 16px;
+  display: grid;
+  gap: 14px;
+  width: 148px;
+}
+
+.desktop-icon {
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  background: rgba(19, 10, 40, 0.62);
+  color: inherit;
+  padding: 12px 10px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.desktop-icon:hover {
+  transform: translate(-2px, -2px) rotate(-1deg) scale(1.02);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.4);
+}
+
+.desktop-icon-emoji {
+  font-size: 1.8rem;
+}
+
+.accent-diamond { box-shadow: 0 0 0 2px rgba(56, 246, 255, 0.32), 4px 4px 0 rgba(0, 0, 0, 0.35); }
+.accent-fire { box-shadow: 0 0 0 2px rgba(255, 140, 40, 0.32), 4px 4px 0 rgba(0, 0, 0, 0.35); }
+.accent-slime { box-shadow: 0 0 0 2px rgba(113, 255, 118, 0.32), 4px 4px 0 rgba(0, 0, 0, 0.35); }
+.accent-danger { box-shadow: 0 0 0 2px rgba(255, 71, 184, 0.32), 4px 4px 0 rgba(0, 0, 0, 0.35); }
+.accent-warning { box-shadow: 0 0 0 2px rgba(255, 241, 79, 0.32), 4px 4px 0 rgba(0, 0, 0, 0.35); }
+
+.notifications-layer {
+  position: absolute;
+  right: 18px;
+  top: 78px;
+  display: grid;
+  gap: 12px;
+  width: min(320px, calc(100vw - 36px));
+}
+
+.toast {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(23, 12, 48, 0.72);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+.window-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.window-frame {
+  position: absolute;
+  width: min(720px, calc(100vw - 36px));
+  border: 3px solid rgba(255, 255, 255, 0.24);
+  background: linear-gradient(180deg, rgba(20, 11, 44, 0.88), rgba(10, 6, 24, 0.94));
+  box-shadow: 10px 12px 0 rgba(0, 0, 0, 0.34);
+}
+
+.window-frame.focused {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08), 12px 14px 0 rgba(0, 0, 0, 0.34), 0 0 40px rgba(56, 246, 255, 0.18);
+}
+
+.window-titlebar {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: linear-gradient(90deg, #ff47b8, #38f6ff, #fff14f);
+  color: #07010e;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  cursor: grab;
+  text-transform: uppercase;
 }
 
-.App-link {
-  color: #61dafb;
+.window-actions {
+  display: flex;
+  gap: 6px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.window-actions button,
+.button-row button,
+.taskbar-button,
+.controls-panel button {
+  border: 2px solid rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, #fff67a, #ff9f1c);
+  color: #130518;
+  padding: 8px 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.window-actions button {
+  padding: 3px 8px;
+}
+
+.window-body {
+  padding: 16px;
+}
+
+.app-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.app-grid-thumbnail,
+.app-grid-intro,
+.app-grid-song {
+  grid-template-columns: 280px 1fr;
+}
+
+.app-grid-small {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel {
+  border: 2px solid var(--panel-border);
+  background: var(--panel);
+  padding: 14px;
+}
+
+.panel h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.4rem;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.controls-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.control-stack {
+  display: grid;
+  gap: 6px;
+}
+
+.control-stack input,
+.control-stack textarea,
+.control-stack select {
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slider-row,
+.toggle-row {
+  display: grid;
+  gap: 8px;
+}
+
+.slider-row input {
+  width: 100%;
+}
+
+.toggle-row {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.preview-panel canvas {
+  width: 100%;
+  height: auto;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  background: #201425;
+}
+
+.intro-preview {
+  min-height: 330px;
+}
+
+.intro-scene {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at center, color-mix(in srgb, var(--intro-color) 42%, white), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    linear-gradient(135deg, #180729, #090022 55%, #1d0034);
+}
+
+.intro-scene.vibe-hacker {
+  background:
+    linear-gradient(rgba(40, 255, 140, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(40, 255, 140, 0.16) 1px, transparent 1px),
+    #04150c;
+  background-size: 28px 28px;
+}
+
+.intro-scene.vibe-fire {
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 130, 0.22), transparent 30%),
+    linear-gradient(180deg, #470400, #c43200 45%, #210000);
+}
+
+.intro-scene.vibe-galaxy {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.28), transparent 18%),
+    radial-gradient(circle at 50% 50%, rgba(104, 74, 255, 0.3), transparent 28%),
+    linear-gradient(180deg, #070018, #170330 40%, #031936);
+}
+
+.intro-scene.vibe-neon,
+.intro-scene.vibe-gaming {
+  background:
+    linear-gradient(45deg, rgba(255, 0, 157, 0.3), transparent),
+    linear-gradient(135deg, rgba(0, 255, 247, 0.25), transparent),
+    #11061f;
+}
+
+.intro-particles,
+.intro-ring {
+  position: absolute;
+  inset: 0;
+}
+
+.intro-particles {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 2px, transparent 2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 0 1px, transparent 1px);
+  background-size: 120px 120px, 70px 70px;
+  opacity: 0.45;
+  animation: twinkle 5s linear infinite;
+}
+
+.intro-ring::before {
+  content: '';
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border: 8px solid var(--intro-color);
+  border-radius: 50%;
+  box-shadow: 0 0 24px var(--intro-color);
+  animation: spinScale 2.8s ease-in-out infinite;
+}
+
+.intro-name,
+.intro-tagline,
+.intro-stamp {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.intro-name {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 24px var(--intro-color), 4px 4px 0 #000;
+  animation: wobbleIn 1.4s ease;
+}
+
+.intro-tagline {
+  margin-top: 10px;
+  letter-spacing: 0.18em;
+  max-width: 26ch;
+  animation: flicker 1.9s steps(2) infinite;
+}
+
+.intro-stamp {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  color: #14080e;
+  background: var(--yellow);
+  padding: 8px 10px;
+  transform: rotate(-8deg);
+}
+
+.song-cover {
+  min-height: 310px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: end start;
+  padding: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.song-cover-grid {
+  position: absolute;
+  inset: 50% 0 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.24) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.24) 1px, transparent 1px);
+  background-size: 34px 34px;
+  transform: perspective(220px) rotateX(72deg);
+}
+
+.song-cover-title {
+  position: relative;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 2.6rem;
+  line-height: 0.92;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.song-cover-subtitle {
+  position: relative;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.song-chorus {
+  font-size: 1.15rem;
+  line-height: 1.45;
+}
+
+.cringe-meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.rage-output,
+.virus-scene {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.rage-caption {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 0.98;
+  text-transform: uppercase;
+  color: var(--yellow);
+  text-shadow: 4px 4px 0 #000, 0 0 18px rgba(255, 71, 184, 0.75);
+  filter: saturate(1.45) contrast(1.2);
+}
+
+.virus-popup {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: #200009;
+  background: linear-gradient(180deg, #fff14f, #ff6523);
+  padding: 12px;
+  border: 3px dashed rgba(0, 0, 0, 0.55);
+  animation: bounceAlarm 0.8s ease-in-out infinite alternate;
+}
+
+.virus-ad-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.virus-ad {
+  min-height: 110px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 90, 90, 0.16));
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
+.virus-ad img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.taskbar {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(9, 4, 23, 0.78);
+}
+
+.start-pill {
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #55ff9d, #00b34c);
+  color: #021008;
+  font-weight: 900;
+}
+
+.taskbar-achievement {
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 1100px) {
+  .desktop-icons,
+  .notifications-layer {
+    position: static;
+    width: auto;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    padding: 18px 16px 0;
   }
-  to {
-    transform: rotate(360deg);
+
+  .cringe-os {
+    overflow-y: auto;
+    padding-bottom: 96px;
   }
+
+  .window-layer {
+    position: static;
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .window-frame {
+    position: static;
+    width: auto;
+  }
+
+  .taskbar {
+    position: sticky;
+    bottom: 0;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 780px) {
+  .app-grid-thumbnail,
+  .app-grid-intro,
+  .app-grid-song,
+  .app-grid-small {
+    grid-template-columns: 1fr;
+  }
+
+  .desktop-marquee {
+    font-size: 0.78rem;
+  }
+
+  .taskbar {
+    flex-wrap: wrap;
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-20px); }
+}
+
+@keyframes twinkle {
+  0% { transform: translateY(0); opacity: 0.28; }
+  50% { transform: translateY(-10px); opacity: 0.5; }
+  100% { transform: translateY(0); opacity: 0.28; }
+}
+
+@keyframes spinScale {
+  0% { transform: rotate(0deg) scale(0.68); }
+  50% { transform: rotate(180deg) scale(1); }
+  100% { transform: rotate(360deg) scale(0.68); }
+}
+
+@keyframes wobbleIn {
+  0% { transform: scale(0.6) rotate(-12deg); opacity: 0; }
+  70% { transform: scale(1.06) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.42; }
+}
+
+@keyframes bounceAlarm {
+  from { transform: translateY(0) rotate(-1deg); }
+  to { transform: translateY(-4px) rotate(1deg); }
 }
