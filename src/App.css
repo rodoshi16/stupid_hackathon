@@ -693,6 +693,253 @@
   filter: saturate(1.45) contrast(1.2);
 }
 
+.rage-catfish-hint {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.rage-catfish-reroll {
+  border: 3px dashed #bfff00 !important;
+  background: linear-gradient(180deg, #ff1493, #c026d3) !important;
+  color: #fff !important;
+  animation: catfishRerollPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes catfishRerollPulse {
+  0%,
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: hue-rotate(25deg) brightness(1.15);
+  }
+}
+
+.rage-catfish-meme {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  border: 4px solid transparent;
+  background:
+    linear-gradient(160deg, #1a0508 0%, #0d0220 50%, #051a0d 100%) padding-box,
+    linear-gradient(
+        90deg,
+        #ff1493,
+        #bfff00,
+        #00fff7,
+        #ff1493,
+        #ff6600,
+        #ff1493
+      )
+      border-box;
+  box-shadow:
+    0 0 32px rgba(255, 20, 147, 0.55),
+    0 0 18px rgba(191, 255, 0, 0.25),
+    0 12px 28px rgba(0, 0, 0, 0.65),
+    inset 0 0 60px rgba(255, 0, 85, 0.12);
+  overflow: hidden;
+  animation: catfishMemeShake 4.5s ease-in-out infinite;
+}
+
+@keyframes catfishMemeShake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    transform: translate(-1px, 1px) rotate(-0.25deg);
+  }
+  20% {
+    transform: translate(1px, -1px) rotate(0.35deg);
+  }
+  30% {
+    transform: translate(-1px, 0) rotate(-0.2deg);
+  }
+  40% {
+    transform: translate(0, 1px) rotate(0.15deg);
+  }
+  50% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.rage-catfish-sparkles {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  line-height: 1.15;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.rage-catfish-sparkles-a {
+  color: #bfff00;
+  text-shadow:
+    0 0 10px #ff1493,
+    2px 0 0 #000,
+    -2px 0 0 #000;
+  animation: catfishSparkleWobble 1.6s ease-in-out infinite;
+}
+
+.rage-catfish-sparkles-b {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 0.72rem;
+  color: #ff3366;
+  text-shadow:
+    0 0 12px #00fff7,
+    1px 1px 0 #000;
+  animation: catfishSparkleWobble 2.4s ease-in-out infinite reverse;
+}
+
+@keyframes catfishSparkleWobble {
+  0%,
+  100% {
+    transform: scale(1) skewX(0deg);
+    opacity: 0.88;
+  }
+  50% {
+    transform: scale(1.04) skewX(-1.5deg);
+    opacity: 1;
+  }
+}
+
+.rage-catfish-top {
+  margin: 0;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+  font-size: clamp(0.72rem, 2.2vw, 0.88rem);
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #ff1493, #bfff00, #fff, #00fff7, #ff6600, #ff1493);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation:
+    catfishShimmer 2.2s linear infinite,
+    catfishTextJitter 0.35s steps(2) infinite;
+  filter: drop-shadow(0 2px 0 #000) drop-shadow(0 0 10px rgba(255, 20, 147, 0.9));
+}
+
+@keyframes catfishTextJitter {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0.5px, -0.5px);
+  }
+  100% {
+    transform: translate(-0.5px, 0.5px);
+  }
+}
+
+@keyframes catfishShimmer {
+  to {
+    background-position: 300% center;
+  }
+}
+
+.rage-catfish-photo-shell {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 4px ridge #bfff00;
+  outline: 2px solid #ff1493;
+  outline-offset: 2px;
+  box-shadow:
+    inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+    inset 0 0 80px rgba(255, 0, 128, 0.45),
+    0 0 20px rgba(0, 255, 255, 0.35);
+  aspect-ratio: 4 / 5;
+  max-height: min(52vh, 320px);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.rage-catfish-photo-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 20% 15%, rgba(255, 255, 0, 0.4), transparent 45%),
+    radial-gradient(ellipse at 85% 70%, rgba(255, 0, 255, 0.35), transparent 50%),
+    linear-gradient(180deg, rgba(255, 0, 0, 0.12) 0%, transparent 40%, rgba(0, 255, 255, 0.15) 100%);
+  mix-blend-mode: hard-light;
+}
+
+.rage-catfish-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.12) rotate(-0.5deg);
+  filter: saturate(2.35) contrast(1.35) brightness(1.1) blur(0.85px);
+  image-rendering: auto;
+  animation: catfishPhotoWobble 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes catfishPhotoWobble {
+  from {
+    transform: scale(1.1) rotate(-0.8deg);
+  }
+  to {
+    transform: scale(1.14) rotate(0.6deg);
+  }
+}
+
+.rage-catfish-sub {
+  margin: 0;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+  font-size: clamp(0.64rem, 1.95vw, 0.78rem);
+  text-align: center;
+  color: #e0ffe0;
+  text-shadow:
+    0 0 12px #ff1493,
+    2px 2px 0 #000,
+    -1px -1px 0 #bfff00;
+  line-height: 1.4;
+}
+
+.rage-catfish-stamp {
+  margin: 0;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: clamp(0.62rem, 1.8vw, 0.74rem);
+  text-align: center;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  background: linear-gradient(180deg, #ff3366, #ff6600);
+  padding: 6px 8px;
+  border: 2px dashed #000;
+  animation: catfishStampBlink 0.9s step-end infinite;
+}
+
+@keyframes catfishStampBlink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.02);
+  }
+}
+
+.rage-catfish-meter {
+  margin-top: 4px;
+}
+
+.rage-catfish-rage-line {
+  font-size: clamp(1.1rem, 3.5vw, 1.65rem);
+  text-align: center;
+  margin-bottom: 0;
+}
+
 .virus-popup {
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 1.8rem;
