@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
+import './catfish-meme.css';
 
 const APP_DEFS = [
   { id: 'thumbnail', label: 'Thumbnail Forge', accent: 'diamond' },
@@ -61,6 +62,80 @@ const CATFISH_MARQUEE =
   'TRUST THE PROCESS • MAIN CHARACTER ENERGY • U WOULDNT GET IT • STOP ASKING 4 VC • ILY BBY • NO CAP • RATIO + L + COPE • ANGEL #111 • NOT AN NPC • ';
 
 const CATFISH_FLOAT_EMOJI = ['💀', '🩷', '✨', '🔥', '💋', '🙏', '😭', '💅', '🧬', '⚡'];
+
+/** @typedef {{ t: string, red?: boolean }} CatfishBannerPart */
+
+/** @type {CatfishBannerPart[][]} */
+const CATFISH_BANNER_HEADLINES = [
+  [
+    { t: 'Hot ' },
+    { t: 'GAMERS', red: true },
+    { t: ' in your area LOOKING FOR ' },
+    { t: 'LOVE', red: true },
+  ],
+  [
+    { t: 'Meet ' },
+    { t: 'HOT SINGLES', red: true },
+    { t: ' NEAR YOUR ' },
+    { t: 'REDSTONE FARM', red: true },
+  ],
+  [
+    { t: 'Local ' },
+    { t: 'DUO PARTNERS', red: true },
+    { t: ' WANT ' },
+    { t: 'YOU', red: true },
+    { t: ' TONIGHT!!!' },
+  ],
+  [
+    { t: 'Single ' },
+    { t: 'MINECRAFT', red: true },
+    { t: ' ' },
+    { t: 'MOMS', red: true },
+    { t: ' HATE THIS ONE WEIRD TRICK' },
+  ],
+  [
+    { t: 'Hot ' },
+    { t: 'BEDWARS', red: true },
+    { t: ' ' },
+    { t: 'PLAYERS', red: true },
+    { t: ' IN YOUR CHUNK — ' },
+    { t: 'CHAT NOW', red: true },
+  ],
+  [
+    { t: 'Lonely? ' },
+    { t: 'VILLAGERS', red: true },
+    { t: ' IN YOUR AREA ARE ' },
+    { t: 'ONLINE', red: true },
+  ],
+];
+
+const CATFISH_SUBBAR_LINES = [
+  'Singles in your area',
+  'Singles near your base',
+  'Active now within render distance',
+  '3 villagers are typing…',
+  'Verified by a suspicious diamond merchant',
+  'Hot mobs in your biome (parody)',
+];
+
+const CATFISH_FAKE_USERNAMES = [
+  'Amanda_Block23',
+  'xX_DreamSmp420',
+  'LatinBeauty_xx',
+  'Jane_69_Diamonds',
+  'EgirlSteve99',
+  'HotCreeperMom',
+  'BaddiePickaxe',
+  'UwU_NetherQueen',
+  'KittyKat_MLG',
+  'SingleAndMining',
+  'YourDuosEx',
+  'BedwarsBabe_07',
+  'NitroPrincess',
+  'VillagerHunter22',
+  'AlexButRealer',
+  'HerobrineSister',
+];
 
 const VIRUS_POPUPS = [
   'YOUR PC HAS 37 TROJANS',
@@ -177,6 +252,15 @@ const INTRO_RANDOM_TAGLINES = [
 
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function rollCatfishBannerProfiles() {
+  const shuffled = [...CATFISH_FAKE_USERNAMES].sort(() => Math.random() - 0.5);
+  return [0, 1, 2].map((slot) => ({
+    name: shuffled[slot % shuffled.length],
+    age: Math.floor(Math.random() * 12) + 18,
+    miles: Math.floor(Math.random() * 9) + 1,
+  }));
 }
 
 function clamp(value, min, max) {
@@ -1055,7 +1139,7 @@ function App() {
             onDragStart={startDrag}
             zIndex={30 + renderedWindowIds.indexOf('virus')}
           >
-            <VirusSimulator soundEnabled={soundEnabled} />
+            <VirusSimulator />
           </Window>
         )}
       </section>
@@ -1645,7 +1729,11 @@ function RageTranslator() {
               </div>
               <div className="rage-catfish-photo-shell">
                 <div className="rage-catfish-photo-scan" aria-hidden />
-                <img className="rage-catfish-photo" src={friendPhoto} alt="Uploaded friend in catfish meme frame" />
+                <img
+                  className="rage-catfish-photo"
+                  src={friendPhoto}
+                  alt="Uploaded friend in chaotic catfish meme frame"
+                />
               </div>
             </div>
             <p className="rage-catfish-sub">{CATFISH_MEME_SUB[catfishSubIdx]}</p>
@@ -1682,10 +1770,15 @@ function RageTranslator() {
   );
 }
 
-function VirusSimulator({ soundEnabled }) {
+function VirusSimulator() {
   const [photo, setPhoto] = useState('');
   const [popup, setPopup] = useState(VIRUS_POPUPS[0]);
   const [progress, setProgress] = useState(14);
+  const [bannerHeadlineIdx, setBannerHeadlineIdx] = useState(0);
+  const [bannerSubbarIdx, setBannerSubbarIdx] = useState(0);
+  const [bannerProfiles, setBannerProfiles] = useState(() => rollCatfishBannerProfiles());
+  const [exporting, setExporting] = useState(false);
+  const bannerExportRef = useRef(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -1695,44 +1788,156 @@ function VirusSimulator({ soundEnabled }) {
     return () => window.clearInterval(timer);
   }, []);
 
+  const rollBannerAd = () => {
+    setBannerHeadlineIdx(Math.floor(Math.random() * CATFISH_BANNER_HEADLINES.length));
+    setBannerSubbarIdx(Math.floor(Math.random() * CATFISH_SUBBAR_LINES.length));
+    setBannerProfiles(rollCatfishBannerProfiles());
+  };
+
   const handleUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => setPhoto(reader.result?.toString() || '');
+    reader.onload = () => {
+      setPhoto(reader.result?.toString() || '');
+      rollBannerAd();
+    };
     reader.readAsDataURL(file);
+    event.target.value = '';
+  };
+
+  const handleExportBannerPng = async () => {
+    const node = bannerExportRef.current;
+    if (!node || !photo || exporting) {
+      return;
+    }
+    setExporting(true);
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#f5f5f5',
+        logging: false,
+      });
+      const link = document.createElement('a');
+      link.download = `catfish-banner-parody-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
     <div className="app-grid app-grid-small">
       <div className="panel controls-panel">
-        <h2>Clearly Fake Scam Builder</h2>
+        <h2>Parody spam banner factory</h2>
         <label className="control-stack">
-          <span>Upload friend photo for parody banner ads</span>
+          <span>Upload a pic — fake &quot;hot singles&quot; ad (same face, three names)</span>
           <input type="file" accept="image/*" onChange={handleUpload} />
         </label>
+        {photo ? (
+          <button type="button" className="rage-catfish-reroll" onClick={rollBannerAd}>
+            Reroll banner ad chaos
+          </button>
+        ) : null}
         <div className="virus-progress">
           <div className="virus-progress-bar">
             <span style={{ width: `${clamp(progress, 0, 100)}%` }} />
           </div>
           <p>Installing Optifine Ultra HD 9000: {clamp(progress, 0, 100)}%</p>
         </div>
-        <button type="button" onClick={() => playToneSequence(soundEnabled, [110, 98, 87, 73], 0.1)}>
-          Trigger suspicious noise
+        <button
+          type="button"
+          className="catfish-export-png"
+          disabled={!photo || exporting}
+          onClick={handleExportBannerPng}
+        >
+          {exporting ? 'Exporting…' : 'Download meme as PNG'}
         </button>
       </div>
       <div className="panel virus-scene">
         <div className="virus-popup">{popup}</div>
-        <div className="virus-ad-grid">
-          <div className="virus-ad">FREE ROBUX</div>
-          <div className="virus-ad">
-            {photo ? <img src={photo} alt="Uploaded friend" /> : <span>YOUR FACE HERE</span>}
+        {photo ? (
+          <div
+            ref={bannerExportRef}
+            className="rage-catfish-banner-root"
+            id="catfish-parody-banner-virus"
+          >
+            <div className="rage-catfish-banner-ad">
+              <div className="catfish-banner-window-bar" aria-hidden>
+                <span className="catfish-banner-window-title">hot_singles_near_you.htm</span>
+                <span className="catfish-banner-window-btns">— □ ×</span>
+              </div>
+              <div className="catfish-banner-flash-strip" aria-hidden>
+                🔥 LIMITED TIME 🔥 CLICK NOW 🔥 NO VIRUS (LIE) 🔥
+              </div>
+              <div className="catfish-banner-inner">
+                <p className="catfish-banner-headline">
+                  {CATFISH_BANNER_HEADLINES[bannerHeadlineIdx].map((part, index) => (
+                    <span
+                      key={`${bannerHeadlineIdx}-${index}-${part.t}`}
+                      className={part.red ? 'catfish-banner-red' : undefined}
+                    >
+                      {part.t}
+                    </span>
+                  ))}
+                </p>
+                <div className="catfish-banner-subbar">{CATFISH_SUBBAR_LINES[bannerSubbarIdx]}</div>
+                <div className="catfish-banner-profiles">
+                  {bannerProfiles.map((profile, index) => (
+                    <div key={`${profile.name}-${index}`} className="catfish-banner-profile">
+                      <a
+                        href="#catfish-parody-banner-virus"
+                        className="catfish-banner-fake-link"
+                        onClick={(event) => event.preventDefault()}
+                      >
+                        {profile.name}
+                      </a>
+                      <p className="catfish-banner-meta">
+                        {profile.age}, {profile.miles} mile{profile.miles === 1 ? '' : 's'} away
+                      </p>
+                      <div className="catfish-banner-photo-frame">
+                        <span className="catfish-banner-live-badge" aria-hidden>
+                          LIVE
+                        </span>
+                        <img
+                          className="catfish-banner-photo"
+                          src={photo}
+                          alt="Parody: same upload repeated in three fake profile slots"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="catfish-banner-cta">
+                  CHAT NOW — 100% FREE*
+                </button>
+                <p className="catfish-banner-fineprint">
+                  *Parody only. Not a real service. Don&apos;t click weird ads in real life.
+                </p>
+              </div>
+            </div>
+            <div className="catfish-banner-liar" aria-hidden>
+              <span>LIAR!</span>
+            </div>
           </div>
-          <div className="virus-ad">HOT SINGLES NEAR YOUR BASE</div>
-          <div className="virus-ad">DOWNLOAD MORE RAM</div>
-        </div>
+        ) : (
+          <div className="virus-ad-grid">
+            <div className="virus-ad">FREE ROBUX</div>
+            <div className="virus-ad">
+              <span>YOUR FACE HERE</span>
+            </div>
+            <div className="virus-ad">HOT SINGLES NEAR YOUR BASE</div>
+            <div className="virus-ad">DOWNLOAD MORE RAM</div>
+          </div>
+        )}
         <p className="panel-caption">
           Parody only. No passwords, no payment forms, no fake credential theft nonsense.
         </p>
