@@ -62,6 +62,41 @@ const DESKTOP_NOTICES = [
   'Dubstep engine warmed up and ready for deployment.',
 ];
 
+const PARODY_ADS = [
+  {
+    windowTitle: "Let's Chat Now?",
+    headline: 'HOT SINGLES NEAR YOUR REDSTONE FARM',
+    subhead: '3 villagers are typing...',
+    cta: 'Start Chat',
+    badge: 'ONLINE',
+    avatar: '💋',
+  },
+  {
+    windowTitle: 'Totally Legit Alert',
+    headline: 'HOT MLG GAMERS IN YOUR AREA',
+    subhead: 'Zero homework. Infinite montage clips.',
+    cta: 'Join Lobby',
+    badge: 'LIVE',
+    avatar: '🎮',
+  },
+  {
+    windowTitle: 'Dorito Dating Suite',
+    headline: 'MEET CUTE SINGLES WHO LOVE SKYWARS',
+    subhead: 'Now featuring 4 suspiciously rich creepers.',
+    cta: 'Say Hi',
+    badge: 'MATCHED',
+    avatar: '✨',
+  },
+  {
+    windowTitle: 'Windows Cringe Messenger',
+    headline: 'SOMEONE THINKS YOUR THUMBNAIL IS FIRE',
+    subhead: 'Reply before they uninstall Optifine.',
+    cta: 'Open DM',
+    badge: 'PINGING',
+    avatar: '🔥',
+  },
+];
+
 const DEFAULT_WINDOW_POSITIONS = {
   thumbnail: { x: 76, y: 108 },
   intro: { x: 280, y: 126 },
@@ -134,6 +169,20 @@ function playToneSequence(enabled, frequencies, duration = 0.12) {
   });
 }
 
+function playAudioFile(enabled, fileName, volume = 0.6) {
+  if (!enabled || typeof window === 'undefined') {
+    return;
+  }
+
+  const audio = new Audio(`${process.env.PUBLIC_URL}/${fileName}`);
+  audio.volume = volume;
+  audio.play().catch(() => {});
+}
+
+function playRandomNotificationSound(enabled) {
+  playAudioFile(enabled, randomItem(['discord.mp3', 'skype.mp3']), 0.45);
+}
+
 function buildInitialWindows() {
   return APP_DEFS.reduce((accumulator, app, index) => {
     accumulator[app.id] = {
@@ -160,6 +209,7 @@ function App() {
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'CringeCraft OS recovered from a dusty 2016 USB stick.' },
   ]);
+  const [adPopups, setAdPopups] = useState([]);
   const [achievement, setAchievement] = useState('Viral in 2016');
   const dragRef = useRef(null);
 
@@ -172,7 +222,6 @@ function App() {
     }, 230);
     const bootTimer = window.setTimeout(() => {
       setBooting(false);
-      playToneSequence(soundEnabled, [392, 587, 784], 0.14);
     }, 2400);
 
     return () => {
@@ -196,6 +245,45 @@ function App() {
 
     return () => window.clearInterval(timer);
   }, [booting]);
+
+  useEffect(() => {
+    if (booting) {
+      return undefined;
+    }
+
+    let popupId = 1;
+    const spawnPopup = () => {
+      const template = randomItem(PARODY_ADS);
+      const nextPopup = {
+        id: `popup-${Date.now()}-${popupId}`,
+        ...template,
+        x: 18 + Math.floor(Math.random() * 250),
+        y: 110 + Math.floor(Math.random() * 190),
+      };
+      popupId += 1;
+      setAdPopups((current) => [nextPopup, ...current].slice(0, 3));
+    };
+
+    const initialTimer = window.setTimeout(spawnPopup, 4500);
+    const timer = window.setInterval(spawnPopup, 15000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(timer);
+    };
+  }, [booting]);
+
+  useEffect(() => {
+    if (booting) {
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => {
+      playRandomNotificationSound(soundEnabled);
+    }, 300000);
+
+    return () => window.clearInterval(timer);
+  }, [booting, soundEnabled]);
 
   useEffect(() => {
     const syncCompact = () => {
@@ -335,7 +423,10 @@ function App() {
   }
 
   return (
-    <main className={`cringe-os ${isCompact ? 'compact-mode' : ''}`}>
+    <main
+      className={`cringe-os ${isCompact ? 'compact-mode' : ''}`}
+      style={{ '--desktop-wallpaper': `url(${process.env.PUBLIC_URL}/mlg.jpg)` }}
+    >
       <div className="wallpaper-noise" />
       <header className="desktop-marquee">
         <span>CRINGECRAFT STUDIO</span>
@@ -364,6 +455,40 @@ function App() {
           <div className="toast" key={notice.id}>
             <strong>OS ALERT</strong>
             <span>{notice.text}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="ad-popup-layer">
+        {adPopups.map((popup) => (
+          <div
+            className="ad-popup"
+            key={popup.id}
+            style={{ right: `${popup.x}px`, top: `${popup.y}px` }}
+          >
+            <div className="ad-popup-titlebar">
+              <span>{popup.windowTitle}</span>
+              <button
+                type="button"
+                onClick={() =>
+                  setAdPopups((current) => current.filter((item) => item.id !== popup.id))
+                }
+              >
+                x
+              </button>
+            </div>
+            <div className="ad-popup-body">
+              <div className="ad-popup-avatar">{popup.avatar}</div>
+              <div className="ad-popup-copy">
+                <strong>{popup.headline}</strong>
+                <span>{popup.subhead}</span>
+                <div className="ad-popup-chat">hey what's up?? ;)</div>
+              </div>
+            </div>
+            <div className="ad-popup-footer">
+              <span>{popup.badge}</span>
+              <button type="button">{popup.cta}</button>
+            </div>
           </div>
         ))}
       </div>
@@ -467,7 +592,7 @@ function App() {
         <button
           className="taskbar-button"
           type="button"
-          onClick={() => playToneSequence(soundEnabled, [220, 330, 660, 990], 0.09)}
+          onClick={() => playAudioFile(soundEnabled, 'airhorn.mp3', 0.8)}
         >
           AIRHORN
         </button>
