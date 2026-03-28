@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 
 const APP_DEFS = [
-  { id: 'thumbnail', icon: '⛏️', label: 'Thumbnail Forge', accent: 'diamond' },
-  { id: 'intro', icon: '🌈', label: 'Intro Blaster', accent: 'fire' },
-  { id: 'song', icon: '🎵', label: 'Parody Jukebox', accent: 'slime' },
-  { id: 'rage', icon: '💥', label: 'Rage Translator', accent: 'danger' },
-  { id: 'virus', icon: '☣️', label: 'Totally Safe Download', accent: 'warning' },
+  { id: 'thumbnail', label: 'Thumbnail Forge', accent: 'diamond' },
+  { id: 'intro', label: 'Intro Blaster', accent: 'fire' },
+  { id: 'song', label: 'Parody Jukebox', accent: 'slime' },
+  { id: 'rage', label: 'Rage Translator', accent: 'danger' },
+  { id: 'virus', label: 'Totally Safe Download', accent: 'warning' },
 ];
 
 const CLICKBAIT_TITLES = [
@@ -221,7 +221,7 @@ function playRandomNotificationSound(enabled) {
 function buildInitialWindows() {
   return APP_DEFS.reduce((accumulator, app, index) => {
     accumulator[app.id] = {
-      open: app.id === 'thumbnail',
+      open: false,
       minimized: false,
       title: app.label,
       accent: app.accent,
@@ -240,7 +240,7 @@ function App() {
   );
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [windows, setWindows] = useState(buildInitialWindows);
-  const [focusOrder, setFocusOrder] = useState(['thumbnail']);
+  const [focusOrder, setFocusOrder] = useState([]);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'CringeCraft OS recovered from a dusty 2016 USB stick.' },
   ]);
@@ -477,10 +477,11 @@ function App() {
             onClick={() => openWindow(app.id)}
             type="button"
           >
-            <span className="desktop-icon-emoji" aria-hidden="true">
-              {app.icon}
+            <span className={`desktop-icon-glyph desktop-icon-glyph-${app.id}`} aria-hidden="true">
+              <span className="desktop-icon-glyph-window" />
+              <span className="desktop-icon-glyph-badge" />
             </span>
-            <span>{app.label}</span>
+            <span className="desktop-icon-label">{app.label}</span>
           </button>
         ))}
       </section>
@@ -616,7 +617,6 @@ function App() {
       </section>
 
       <footer className="taskbar">
-        <div className="start-pill">START</div>
         <button
           className="taskbar-button"
           type="button"
@@ -631,25 +631,6 @@ function App() {
         >
           AIRHORN
         </button>
-        <div className="taskbar-apps">
-          {desktopApps.map((app) => (
-            <button
-              key={app.id}
-              className={`taskbar-app ${app.open && !app.minimized ? 'taskbar-app-active' : ''}`}
-              type="button"
-              onClick={() => {
-                if (!app.open || app.minimized || activeWindowId !== app.id) {
-                  openWindow(app.id);
-                  return;
-                }
-                minimizeWindow(app.id);
-              }}
-            >
-              <span aria-hidden="true">{app.icon}</span>
-              <span>{app.label}</span>
-            </button>
-          ))}
-        </div>
         <div className="taskbar-achievement">Achievement unlocked: {achievement}</div>
       </footer>
     </main>
