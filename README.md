@@ -1,70 +1,69 @@
-# Getting Started with Create React App
+# CringeCraft OS
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A single-page **fake desktop** themed like a dusty **2016 Minecraft YouTuber** machine: draggable windows, a taskbar, fake ads, and four parody “apps” that generate clickbait-style visuals and text. Built with **React** (Create React App). Nothing here is a real game client or social product—it is **satire**.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+| App | What it does |
+|-----|----------------|
+| **Thumbnail Forge** | Compose a parody thumbnail (title, face slot, accents) and export a still via **html2canvas**. |
+| **Intro Blaster** | 3D-style intro scene with themes, particles, and fullscreen. **Generate** randomizes the scene and starts background audio: **Alan Walker tracks** via the **YouTube IFrame API** (embedded player, random pick from a small list). If YouTube fails, it falls back to an **in-browser Web Audio** synth bed. **Replay** plays a short synthetic stinger. |
+| **Ragebaiter** | “Rage translator” text transforms plus a chaotic **catfish meme** layout, rage meter styling, and optional **WEBM** export of the meme clip. |
+| **Catfish Generator** | Parody “hot singles” / virus-banner vibes with profile cards and PNG export. |
 
-### `npm start`
+Sound effects and UI chrome lean into the joke (airhorn, boot screen, notifications).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Requirements
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Node.js** (LTS recommended) and **npm**
+- A modern browser with **Web Audio**, **Canvas**, and (for Intro Blaster music) **YouTube embeds** allowed (not blocked by extensions or strict network rules)
 
-### `npm test`
+## Setup
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+```
 
-### `npm run build`
+## Development
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Opens the app at [http://localhost:3000](http://localhost:3000) with hot reload.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Production build
 
-### `npm run eject`
+```bash
+npm run build
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Outputs an optimized bundle under `build/`, suitable for static hosting.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Tests
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+npm test
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Project layout (high level)
 
-## Learn More
+- `src/App.js` — Main shell: fake OS, windows, and app UIs
+- `src/App.css`, `src/catfish-meme.css` — Layout and meme styling
+- `src/introBackgroundMusic.js` — Web Audio fallback pad for Intro Blaster
+- `src/introAlanWalkerYoutube.js` — YouTube IFrame API helper for intro music
+- `public/` — Static assets (e.g. sounds referenced by the app)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Notes on Intro Blaster audio
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Music uses **embedded YouTube** playback, not bundled MP3s.
+- The player is **preloaded** when Intro Blaster is open with audio enabled so **Generate** can start playback reliably after a click.
+- If nothing plays, check the browser **console**, disable **ad blockers** for local dev, and confirm **taskbar sound** / **Audio** toggles in the app are on.
 
-### Code Splitting
+## License / intent
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+This repository is a **parody / art project**. Thumbnail and “creator” tropes are exaggerated for humor. Do not use generated output to harass, deceive, or impersonate real people.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+*“Recovered from a dusty 2016 USB stick.”*
