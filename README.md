@@ -1,4 +1,4 @@
-# CringeCraft OS
+# CringeCraft Studios
 
 A single-page **fake desktop** themed like a dusty **2016 Minecraft YouTuber** machine: draggable windows, a taskbar, fake ads, and four parody “apps” that generate clickbait-style visuals and text. Built with **React** (Create React App). Nothing here is a real game client or social product—it is **satire**.
 
@@ -53,17 +53,6 @@ npm test
 - `src/introBackgroundMusic.js` — Web Audio fallback pad for Intro Blaster
 - `src/introAlanWalkerYoutube.js` — YouTube IFrame API helper for intro music
 - `public/` — Static assets (e.g. sounds referenced by the app)
-
-## Notes on Intro Blaster audio
-
-- Music uses **embedded YouTube** playback, not bundled MP3s.
-- The player is **preloaded** when Intro Blaster is open with audio enabled so **Generate** can start playback reliably after a click.
-- If nothing plays, check the browser **console**, disable **ad blockers** for local dev, and confirm **taskbar sound** / **Audio** toggles in the app are on.
-
-## License / intent
-
-This repository is a **parody / art project**. Thumbnail and “creator” tropes are exaggerated for humor. Do not use generated output to harass, deceive, or impersonate real people.
-
 ---
 
 *“Recovered from a dusty 2016 USB stick.”*
