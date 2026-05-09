@@ -1,36 +1,49 @@
-# CringeCraft Studios - Best use of Falcon @ Stupid ideas hackathon 
+# Cringecraft studios - Best use of Falcon @ Stupid ideas hackathon
 
-A single-page **desktop** themed as a **2016 YouTuber** machine: draggable windows, a taskbar, fake ads, and four parody “apps” that generate clickbait-style visuals and text. Built with **React** (Create React App). 
+A **single-page React application** that simulates a multi-window desktop environment. Users work inside draggable, focus-managed windows, each hosting a self-contained creative tool. The project demonstrates **complex client-side UI state**, **browser media APIs**, and **client-side export** without a backend.
 
-## Features
+## Technical highlights
 
-| App | What it does |
-|-----|----------------|
-| **Thumbnail Forge** | Compose a parody thumbnail (title, face slot, accents) and export a still via **html2canvas**. |
-| **Intro Blaster** | 3D-style intro scene with themes, particles, and fullscreen. **Generate** randomizes the scene and starts background audio: **Alan Walker tracks** via the **YouTube IFrame API** (embedded player, random pick from a small list). If YouTube fails, it falls back to an **in-browser Web Audio** synth bed. **Replay** plays a short synthetic stinger. |
-| **Ragebaiter** | “Rage translator” text transforms plus a chaotic **catfish meme** layout, rage meter styling, and optional **WEBM** export of the meme clip. |
-| **Catfish Generator** | Parody “hot singles” / virus-banner vibes with profile cards and PNG export. |
+- **React 19** with hooks, composition, and a centralized window manager (position, z-order, minimize, taskbar integration).
+- **Canvas and DOM capture** via **html2canvas** (dynamic import) for high-quality **PNG** exports from composed layouts.
+- **Web Audio API** for procedural audio synthesis (fallback path when external media is unavailable).
+- **YouTube IFrame API** loaded on demand: player lifecycle, origin-aware embed configuration, and **preloading** so playback aligns with browser user-activation policies.
+- **MediaRecorder** and **CanvasRenderingContext2D** animation loops to encode short **WebM** clips from rendered frames.
+- **CSS-driven 3D transforms**, animation, and layered visuals; **Fullscreen API** for presentation mode.
+- **Create React App** toolchain: development server, production build, and Jest/React Testing Library setup.
 
-Sound effects and UI chrome lean into the joke (airhorn, boot screen, notifications).
+## Application modules
 
-## Requirements
+| Module | Technical focus |
+|--------|------------------|
+| **Thumbnail composer** | Composable preview with client-side raster export. |
+| **Intro sequence generator** | Parameterized scene (themes, particles, layout); background audio via embedded streaming player or synthesized audio. |
+| **Typography & graphic studio** | Text processing pipeline, styled preview surface, optional **WebM** export via `captureStream` + `MediaRecorder`. |
+| **Multi-card layout tool** | Reusable card grid, image upload handling, PNG export of the composed view. |
 
-- **Node.js** (LTS recommended) and **npm**
-- A modern browser with **Web Audio**, **Canvas**, and (for Intro Blaster music) **YouTube embeds** allowed (not blocked by extensions or strict network rules)
+## Stack
 
-## Setup
+| Area | Technology |
+|------|------------|
+| UI | React 19, JSX, CSS modules / global stylesheets |
+| Build | react-scripts 5 (Webpack), npm |
+| Capture / export | html2canvas, MediaRecorder, Canvas 2D |
+| Audio / video | Web Audio API, YouTube IFrame API |
+| Testing | React Testing Library, Jest (via CRA) |
+
+## Prerequisites
+
+- Node.js (LTS recommended) and npm  
+- A modern evergreen browser with Web Audio, Canvas, and (for streaming audio in the intro module) support for embedded third-party video players
+
+## Getting started
 
 ```bash
 npm install
-```
-
-## Development
-
-```bash
 npm start
 ```
 
-Opens the app at [http://localhost:3000](http://localhost:3000) with hot reload.
+Application runs at `http://localhost:3000` with hot reload.
 
 ## Production build
 
@@ -38,7 +51,7 @@ Opens the app at [http://localhost:3000](http://localhost:3000) with hot reload.
 npm run build
 ```
 
-Outputs an optimized bundle under `build/`, suitable for static hosting.
+Static output is emitted to `build/` for deployment to any static host.
 
 ## Tests
 
@@ -46,13 +59,15 @@ Outputs an optimized bundle under `build/`, suitable for static hosting.
 npm test
 ```
 
-## Project layout (high level)
+## Repository structure (summary)
 
-- `src/App.js` — Main shell: fake OS, windows, and app UIs
-- `src/App.css`, `src/catfish-meme.css` — Layout and meme styling
-- `src/introBackgroundMusic.js` — Web Audio fallback pad for Intro Blaster
-- `src/introAlanWalkerYoutube.js` — YouTube IFrame API helper for intro music
-- `public/` — Static assets (e.g. sounds referenced by the app)
----
+- `src/App.js` — Shell, window manager, and feature modules  
+- `src/App.css` — Primary layout and desktop chrome  
+- `src/introBackgroundMusic.js` — Web Audio synthesis  
+- `src/introAlanWalkerYoutube.js` — YouTube player integration and preload logic  
+- `public/` — Static assets referenced by the application  
 
-*“Recovered from a dusty 2016 USB stick.”*
+## Notes for local development
+
+- Streaming audio depends on third-party embed availability; ad blockers or network policy may affect playback during development.  
+- WebM encoding support varies by browser; the implementation selects a supported `MediaRecorder` MIME type when possible.
