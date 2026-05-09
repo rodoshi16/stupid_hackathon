@@ -1,6 +1,6 @@
-# CringeCraft Studios
+# CringeCraft Studios - Best use of Falcon @ Stupid ideas hackathon 
 
-A single-page **fake desktop** themed like a dusty **2016 Minecraft YouTuber** machine: draggable windows, a taskbar, fake ads, and four parody “apps” that generate clickbait-style visuals and text. Built with **React** (Create React App). Nothing here is a real game client or social product—it is **satire**.
+A single-page **desktop** themed as a **2016 YouTuber** machine: draggable windows, a taskbar, fake ads, and four parody “apps” that generate clickbait-style visuals and text. Built with **React** (Create React App). 
 
 ## Features
 
